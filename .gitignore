@@ -1,0 +1,32 @@
+.DS_Store
+*.iml
+*.ipr
+*.iws
+*.orig
+*.rej
+**/.keep
+*.sdf
+*.suo
+*.vcxproj.user
+*.patch
+.idea
+.svn
+.classpath
+.project
+.settings
+target
+build
+dependency-reduced-pom.xml
+out
+out/
+
+# Filesystem contract test options and credentials
+auth-keys.xml
+azure-auth-keys.xml
+azure-bfs-auth-keys.xml
+
+# External tool builders
+*/.externalToolBuilders
+*/maven-eclipse.xml
+
+.history/

@@ -1,0 +1,552 @@
+  <configuration  xmlns:xi="http://www.w3.org/2001/XInclude">
+    
+    <property>
+      <name>datanode.htrace.sampler.classes</name>
+      <value>AlwaysSampler</value>
+    </property>
+    
+    <property>
+      <name>datanode.htrace.span.receiver.classes</name>
+      <value>LocalFileSpanReceiver</value>
+    </property>
+    
+    <property>
+      <name>dfs.block.access.token.enable</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>dfs.blockreport.initialDelay</name>
+      <value>120</value>
+    </property>
+    
+    <property>
+      <name>dfs.blocksize</name>
+      <value>67108864</value>
+    </property>
+    
+    <property>
+      <name>dfs.client-write-packet-size</name>
+      <value>16777216</value>
+    </property>
+    
+    <property>
+      <name>dfs.client.failover.proxy.provider.ns-fed</name>
+      <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+    </property>
+    
+    <property>
+      <name>dfs.client.failover.proxy.provider.test-hadoop2</name>
+      <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+    </property>
+    
+    <property>
+      <name>dfs.client.failover.proxy.provider.test-hadoop3</name>
+      <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+    </property>
+    
+    <property>
+      <name>dfs.client.failover.random.order</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>dfs.client.read.shortcircuit</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>dfs.client.read.shortcircuit.streams.cache.size</name>
+      <value>4096</value>
+    </property>
+    
+    <property>
+      <name>dfs.client.retry.policy.enabled</name>
+      <value>false</value>
+    </property>
+    
+    <property>
+      <name>dfs.client.router.specific.namespace1</name>
+      <value>test-hadoop2</value>
+    </property>
+    
+    <property>
+      <name>dfs.client.router.specific.namespace2</name>
+      <value>test-hadoop2</value>
+    </property>
+    
+    <property>
+      <name>dfs.client.router.specific.namespace3</name>
+      <value>test-hadoop3</value>
+    </property>
+    
+    <property>
+      <name>dfs.client.socket-timeout</name>
+      <value>5000</value>
+    </property>
+    
+    <property>
+      <name>dfs.cluster.administrators</name>
+      <value> hdfs</value>
+    </property>
+    
+    <property>
+      <name>dfs.content-summary.limit</name>
+      <value>5000</value>
+    </property>
+    
+    <property>
+      <name>dfs.datanode.address</name>
+      <value>0.0.0.0:50010</value>
+    </property>
+    
+    <property>
+      <name>dfs.datanode.balance.bandwidthPerSec</name>
+      <value>6250000</value>
+    </property>
+    
+    <property>
+      <name>dfs.datanode.data.dir</name>
+      <value>/data1/hadoop/hdfs/data1,/data10/hadoop/hdfs/data1,/data11/hadoop/hdfs/data1,/data12/hadoop/hdfs/data1,/data13/hadoop/hdfs/data1,/data14/hadoop/hdfs/data1,/data15/hadoop/hdfs/data1,/data16/hadoop/hdfs/data1,/data2/hadoop/hdfs/data1,/data3/hadoop/hdfs/data1,/data4/hadoop/hdfs/data1,/data5/hadoop/hdfs/data1,/data6/hadoop/hdfs/data1,/data7/hadoop/hdfs/data1,/data8/hadoop/hdfs/data1,/data9/hadoop/hdfs/data1</value>
+      <final>true</final>
+    </property>
+    
+    <property>
+      <name>dfs.datanode.data.dir.perm</name>
+      <value>750</value>
+    </property>
+    
+    <property>
+      <name>dfs.datanode.directoryscan.threads</name>
+      <value>32</value>
+    </property>
+    
+    <property>
+      <name>dfs.datanode.du.reserved</name>
+      <value>492047833088</value>
+    </property>
+    
+    <property>
+      <name>dfs.datanode.failed.volumes.tolerated</name>
+      <value>2</value>
+      <final>true</final>
+    </property>
+    
+    <property>
+      <name>dfs.datanode.handler.count</name>
+      <value>100</value>
+    </property>
+    
+    <property>
+      <name>dfs.datanode.http.address</name>
+      <value>0.0.0.0:50075</value>
+    </property>
+    
+    <property>
+      <name>dfs.datanode.https.address</name>
+      <value>0.0.0.0:50475</value>
+    </property>
+    
+    <property>
+      <name>dfs.datanode.ipc.address</name>
+      <value>0.0.0.0:8010</value>
+    </property>
+    
+    <property>
+      <name>dfs.datanode.max.transfer.threads</name>
+      <value>23857</value>
+    </property>
+    
+    <property>
+      <name>dfs.datanode.socket.write.timeout</name>
+      <value>5000</value>
+    </property>
+    
+    <property>
+      <name>dfs.domain.socket.path</name>
+      <value>/var/lib/hadoop-hdfs/dn_socket</value>
+    </property>
+    
+    <property>
+      <name>dfs.encrypt.data.transfer.cipher.suites</name>
+      <value>AES/CTR/NoPadding</value>
+    </property>
+    
+    <property>
+      <name>dfs.federation.router.default.nameserviceId</name>
+      <value>test-hadoop2</value>
+    </property>
+    
+    <property>
+      <name>dfs.federation.router.file.resolver.client.class</name>
+      <value>org.apache.hadoop.hdfs.server.federation.resolver.MultipleDestinationMountTableResolver</value>
+    </property>
+    
+    <property>
+      <name>dfs.federation.router.monitor.localnamenode.enable</name>
+      <value>false</value>
+    </property>
+    
+    <property>
+      <name>dfs.federation.router.monitor.namenode</name>
+      <value>test-hadoop3.nn1,test-hadoop3.nn2,test-hadoop2.nn1,test-hadoop2.nn2</value>
+    </property>
+    
+    <property>
+      <name>dfs.federation.router.quota.enable</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>dfs.federation.router.store.driver.class</name>
+      <value>org.apache.hadoop.hdfs.server.federation.store.driver.impl.StateStoreZooKeeperImpl</value>
+    </property>
+    
+    <property>
+      <name>dfs.ha.automatic-failover.enabled</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>dfs.ha.fencing.methods</name>
+      <value>shell(/bin/true)</value>
+    </property>
+    
+    <property>
+      <name>dfs.ha.namenodes.ns-fed</name>
+      <value>r1,r2</value>
+    </property>
+    
+    <property>
+      <name>dfs.ha.namenodes.test-hadoop2</name>
+      <value>nn1,nn2</value>
+    </property>
+    
+    <property>
+      <name>dfs.ha.namenodes.test-hadoop3</name>
+      <value>nn1,nn2</value>
+    </property>
+    
+    <property>
+      <name>dfs.heartbeat.interval</name>
+      <value>30</value>
+    </property>
+   
+    <property>
+      <name>dfs.namenode.replication.max-streams</name>
+      <value>3</value>
+    </property>
+ 
+    <property>
+      <name>dfs.hosts.exclude</name>
+      <value>/etc/hadoop/conf/dfs.exclude</value>
+    </property>
+    
+    <property>
+      <name>dfs.http.policy</name>
+      <value>HTTP_ONLY</value>
+    </property>
+    
+    <property>
+      <name>dfs.https.port</name>
+      <value>50470</value>
+    </property>
+    
+    <property>
+      <name>dfs.internal.nameservices</name>
+      <value>test-hadoop3</value>
+    </property>
+    
+    <property>
+      <name>dfs.journalnode.edits.dir</name>
+      <value>/hadoop/hdfs/journal</value>
+    </property>
+    
+    <property>
+      <name>dfs.journalnode.http-address</name>
+      <value>0.0.0.0:8480</value>
+    </property>
+    
+    <property>
+      <name>dfs.journalnode.https-address</name>
+      <value>0.0.0.0:8481</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.accesstime.precision</name>
+      <value>0</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.acls.enabled</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.audit.log.async</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.audit.log.token.tracking.id</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.avoid.read.stale.datanode</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.avoid.write.stale.datanode</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.block.deletion.increment</name>
+      <value>10000</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.checkpoint.dir</name>
+      <value>/hadoop/hdfs/namesecondary</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.checkpoint.edits.dir</name>
+      <value>${dfs.namenode.checkpoint.dir}</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.checkpoint.period</name>
+      <value>21600</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.checkpoint.txns</name>
+      <value>10000000</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.fs-limits.min-block-size</name>
+      <value>1</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.fslock.fair</name>
+      <value>false</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.handler.count</name>
+      <value>1000</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.http-address.test-hadoop2.nn1</name>
+      <value>dn1946.jja.bigo:50070</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.http-address.test-hadoop2.nn2</name>
+      <value>dn2039.jja.bigo:50070</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.http-address.test-hadoop3.nn1</name>
+      <value>164.90.93.112:50070</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.http-address.test-hadoop3.nn2</name>
+      <value>164.90.93.46:50070</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.https-address.test-hadoop3.nn1</name>
+      <value>dn1949.jja.bigo:50470</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.https-address.test-hadoop3.nn2</name>
+      <value>dn2079.jja.bigo:50470</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.lock.detailed-metrics.enabled</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.name.dir</name>
+      <value>/data/hadoop/hdfs/namenode</value>
+      <final>true</final>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.name.dir.restore</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.rpc-address.ns-fed.r1</name>
+      <value>164.90.93.11:8888</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.rpc-address.ns-fed.r2</name>
+      <value>164.90.93.46:8888</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.rpc-address.test-hadoop2.nn1</name>
+      <value>dn1946.jja.bigo:8020</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.rpc-address.test-hadoop2.nn2</name>
+      <value>dn2039.jja.bigo:8020</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.rpc-address.test-hadoop3.nn1</name>
+      <value>dn1949.jja.bigo:8020</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.rpc-address.test-hadoop3.nn2</name>
+      <value>dn2079.jja.bigo:8020</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.safemode.threshold-pct</name>
+      <value>0.99</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.servicerpc-address.nn1</name>
+      <value>dn1949.jja.bigo:8021</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.servicerpc-address.nn2</name>
+      <value>dn2079.jja.bigo:8021</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.shared.edits.dir</name>
+      <value>qjournal://dn2079.jja.bigo:8485;dn1949.jja.bigo:8485;dn1974.jja.bigo:8485/test-hadoop3</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.stale.datanode.interval</name>
+      <value>30000</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.startup.delay.block.deletion.sec</name>
+      <value>3600</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.support.allow.format</name>
+      <value>false</value>
+    </property>
+    
+    <property>
+      <name>dfs.namenode.write.stale.datanode.ratio</name>
+      <value>1.0f</value>
+    </property>
+    
+    <property>
+      <name>dfs.nameservice.id</name>
+      <value>test-hadoop3</value>
+    </property>
+    
+    <property>
+      <name>dfs.nameservices</name>
+      <value>test-hadoop3,test-hadoop2,ns-fed</value>
+    </property>
+    
+    <property>
+      <name>dfs.permissions.ContentSummary.subAccess</name>
+      <value>false</value>
+    </property>
+    
+    <property>
+      <name>dfs.permissions.enabled</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>dfs.permissions.superusergroup</name>
+      <value>hdfs</value>
+    </property>
+    
+    <property>
+      <name>dfs.replication</name>
+      <value>3</value>
+    </property>
+    
+    <property>
+      <name>dfs.replication.max</name>
+      <value>50</value>
+    </property>
+    
+    <property>
+      <name>dfs.webhdfs.enabled</name>
+      <value>true</value>
+      <final>true</final>
+    </property>
+    
+    <property>
+      <name>fs.permissions.umask-mode</name>
+      <value>022</value>
+    </property>
+    
+    <property>
+      <name>ha.health-monitor.rpc-timeout.ms</name>
+      <value>5000</value>
+    </property>
+    
+    <property>
+      <name>hadoop.caller.context.enabled</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>hadoop.zk.address</name>
+      <value>dn1949.jja.bigo:2181,dn2079.jja.bigo:2181,dn1974.jja.bigo:2181</value>
+    </property>
+    
+    <property>
+      <name>manage.include.files</name>
+      <value>false</value>
+    </property>
+    
+    <property>
+      <name>namenode.htrace.sampler.classes</name>
+      <value>AlwaysSampler</value>
+    </property>
+    
+    <property>
+      <name>namenode.htrace.span.receiver.classes</name>
+      <value>LocalFileSpanReceiver</value>
+    </property>
+    
+    <property>
+      <name>nfs.exports.allowed.hosts</name>
+      <value>* rw</value>
+    </property>
+    
+    <property>
+      <name>nfs.file.dump.dir</name>
+      <value>/tmp/.hdfs-nfs</value>
+    </property>
+
+      <property>
+          <name>test.SymlinkEnabledForTesting</name>
+          <value>true</value>
+      </property>
+    
+  </configuration>
