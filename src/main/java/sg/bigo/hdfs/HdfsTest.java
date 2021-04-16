@@ -4,15 +4,14 @@ import lombok.SneakyThrows;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.hdfs.protocol.datatransfer.Op;
 import sg.bigo.hdfs.common.HDFSConfig;
 import sg.bigo.hdfs.task.CheckStatusTask;
 import sg.bigo.hdfs.task.CreateTask;
 import sg.bigo.hdfs.task.DeleteTask;
+import sg.bigo.hdfs.task.MixTask;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 
 public class HdfsTest {
@@ -35,15 +34,29 @@ public class HdfsTest {
         conf.setClassLoader(HdfsTest.class.getClassLoader());
         conf.set("fs.defaultFS", NNADDR);
 
-
         File file = new File("record.txt");
         FileOutputStream fileOut = new FileOutputStream(file, true);
         Long a = System.currentTimeMillis();
         String st = "execute op " + Operation + "start time:" + a + "\n";
         fileOut.write(st.getBytes());
 
+        excuteTask(Operation, conf);
+
+        System.out.println("################ test report #################");
+        Long b = System.currentTimeMillis();
+        String et = "end  time :" + b + "\n";
+        fileOut.write(et.getBytes());
+        String allt = "all time :" + (b - a) + "ms" + "\n";
+        fileOut.write(allt.getBytes());
+        System.out.println("总用时:" + (b - a) + "ms");
+        System.out.println("##############################################");
+
+        System.exit(0);
+    }
+
+    public static void excuteTask(String Operation, Configuration conf) {
         switch (Operation) {
-            case "check_status":
+            case "check":
                 CheckStatusTask.doTask(conf);
                 break;
 
@@ -56,8 +69,7 @@ public class HdfsTest {
                 break;
 
             case "mix":
-                System.out.println("not support this op.");
-                log.warn("not support this op.");
+                MixTask.doTask(conf);
                 break;
 
             default:
@@ -65,16 +77,6 @@ public class HdfsTest {
                 log.error("wrong operation");
                 break;
         }
-
-        System.out.println("################ test report #################");
-        Long b = System.currentTimeMillis();
-        String et = "end  time :" + b + "\n";
-        fileOut.write(et.getBytes());
-        String allt = "all time :" + (b - a) + "ms" + "\n";
-        fileOut.write(allt.getBytes());
-        System.out.println("总用时:" + (b - a) + "ms");
-        System.out.println("##############################################");
-
-        return;
     }
+
 }

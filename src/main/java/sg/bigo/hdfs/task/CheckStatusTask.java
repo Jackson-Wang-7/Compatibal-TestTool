@@ -51,6 +51,7 @@ public class CheckStatusTask implements Runnable {
                 ThreadPool.execute(hlt);
             }
             Latch.await();
+            ThreadPool.shutdown();
         } catch (InterruptedException e) {
             log.warn("CheckStatusTask: execute task error,exception:", e);
         }

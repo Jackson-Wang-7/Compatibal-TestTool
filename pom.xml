@@ -6,7 +6,7 @@
 
     <groupId>org.example</groupId>
     <artifactId>HdfsTest</artifactId>
-    <version>0.7-alpha</version>
+    <version>1.1-alpha</version>
 
     <build>
         <plugins>

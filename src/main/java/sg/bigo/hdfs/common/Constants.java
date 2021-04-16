@@ -42,4 +42,12 @@ public class Constants {
     public static final String KEY_DELETE_FILE_PREFIX = "delete_file_prefix";
 
     public static final String VALUE_DELETE_FILE_PREFIX_DEFAULT = "/xxx/xxx/xxx";
+
+    public static final String KEY_OPS = "ops";
+
+    public static final String VALUE_OPS_DEFAULT = "check";
+
+    public static final String KEY_LOOP_COUNT = "loopCount";
+
+    public static final String VALUE_LOOP_COUNT_DEFAULT = "1";
 }

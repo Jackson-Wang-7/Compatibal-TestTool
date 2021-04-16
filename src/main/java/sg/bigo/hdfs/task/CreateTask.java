@@ -55,6 +55,7 @@ public class CreateTask implements Runnable {
                 ThreadPool.execute(hlt);
             }
             Latch.await();
+            ThreadPool.shutdown();
         } catch (InterruptedException e) {
             log.warn("CreateTask: execute task error,exception:", e);
         }

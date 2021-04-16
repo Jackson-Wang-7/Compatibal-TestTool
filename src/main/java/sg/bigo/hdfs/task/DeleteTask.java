@@ -44,6 +44,7 @@ public class DeleteTask implements Runnable {
                 ThreadPool.execute(task);
             }
             latch.await();
+            ThreadPool.shutdown();
         } catch (Exception e) {
             log.warn("DeleteTask: delete task error, exception:", e);
         }

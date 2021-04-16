@@ -17,6 +17,8 @@ public class HDFSConfig {
     private String putFilePath;
     private String writeFilePrefix;
     private String deleteFilePrefix;
+    private String mixOps;
+    private int loopCount;
 
     public static HDFSConfig getInstance() {
         return config;
@@ -36,6 +38,8 @@ public class HDFSConfig {
         putFilePath = props.getProperty(Constants.KEY_PUT_FILE_PATH, Constants.VALUE_PUT_FILE_PATH_DEFAULT);
         writeFilePrefix = props.getProperty(Constants.KEY_WRITE_FILE_PREFIX, Constants.VALUE_WRITE_FILE_PREFIX_DEFAULT);
         deleteFilePrefix = props.getProperty(Constants.KEY_DELETE_FILE_PREFIX, Constants.VALUE_DELETE_FILE_PREFIX_DEFAULT);
+        mixOps = props.getProperty(Constants.KEY_OPS, Constants.VALUE_OPS_DEFAULT);
+        loopCount = Integer.valueOf(props.getProperty(Constants.KEY_LOOP_COUNT, Constants.VALUE_LOOP_COUNT_DEFAULT));
     }
 
     public String getHost() {
@@ -76,5 +80,13 @@ public class HDFSConfig {
 
     public String getDeleteFilePrefix() {
         return deleteFilePrefix;
+    }
+
+    public String getMixOps() {
+        return mixOps;
+    }
+
+    public int getLoopCount() {
+        return loopCount;
     }
 }
