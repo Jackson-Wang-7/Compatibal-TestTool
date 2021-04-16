@@ -1,4 +1,4 @@
-package sg.bigo.hdfs;
+package sg.bigo.hdfs.common;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,6 +35,21 @@ public class HdfsOperator {
             return status;
         } catch (Exception e) {
             log.error(" file " + src + " check failed! exception:", e);
+            return null;
+        }
+    }
+
+    public static List<String> listPrefix(String prefix, FileSystem hdfs) {
+        try {
+            FileStatus[] statusArray = hdfs.globStatus(new Path(prefix + "*"));
+            List<String> paths = new ArrayList<>(statusArray.length);
+            for(FileStatus s : statusArray) {
+                String fileName = s.getPath().toUri().getPath();
+                paths.add(fileName);
+            }
+            return paths;
+        } catch (IOException e) {
+            log.warn(prefix + " for Prefixlist error. exception:", e);
             return null;
         }
     }
@@ -101,18 +116,4 @@ public class HdfsOperator {
         }
         return true;
     }
-//
-//    public static boolean delete(String src, FileSystem hdfs) {
-//        try {
-//            boolean ret = hdfs.delete(new Path(src), true);
-//            if (!ret) {
-//                log.warn(src + " delete failed!");
-//                return false;
-//            }
-//        } catch (Exception e) {
-//            log.error(" file " + src + " delete failed! exception:", e);
-//            return false;
-//        }
-//        return true;
-//    }
 }
