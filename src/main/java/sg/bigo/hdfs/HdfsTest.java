@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hdfs.protocol.datatransfer.Op;
 import sg.bigo.hdfs.common.HDFSConfig;
 import sg.bigo.hdfs.task.CheckStatusTask;
 import sg.bigo.hdfs.task.CreateTask;
@@ -19,8 +20,6 @@ public class HdfsTest {
 
     @SneakyThrows
     public static void main(String[] args) {
-        System.out.println("1:Offset, 2:TOTAL_FILES, 3:TOTAL_THREADS, 4:NNADDR, 5:REMOTEDIR");
-
         HDFSConfig.getInstance().loadProperties();
 
         HDFSConfig config = HDFSConfig.getInstance();
@@ -40,7 +39,7 @@ public class HdfsTest {
         File file = new File("record.txt");
         FileOutputStream fileOut = new FileOutputStream(file, true);
         Long a = System.currentTimeMillis();
-        String st = "start time sec :" + a + "\n";
+        String st = "execute op " + Operation + "start time:" + a + "\n";
         fileOut.write(st.getBytes());
 
         switch (Operation) {
@@ -48,7 +47,7 @@ public class HdfsTest {
                 CheckStatusTask.doTask(conf);
                 break;
 
-            case "crete":
+            case "create":
                 CreateTask.doTask(conf);
                 break;
 
@@ -62,18 +61,20 @@ public class HdfsTest {
                 break;
 
             default:
+                System.out.println("not support this op.");
                 log.error("wrong operation");
-                throw new IOException("wrong operation");
+                break;
         }
 
         System.out.println("################ test report #################");
         Long b = System.currentTimeMillis();
-        String et = "end  time  sec :" + b + "\n";
+        String et = "end  time :" + b + "\n";
         fileOut.write(et.getBytes());
-        String allt = "all time :" + ((b - a) / 1000) + "s" + "\n";
+        String allt = "all time :" + (b - a) + "ms" + "\n";
         fileOut.write(allt.getBytes());
-        System.out.println("总用时:" + ((b - a) / 1000) + "s");
+        System.out.println("总用时:" + (b - a) + "ms");
         System.out.println("##############################################");
 
+        return;
     }
 }
