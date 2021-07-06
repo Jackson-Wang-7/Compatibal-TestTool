@@ -46,7 +46,7 @@ public class CheckStatusTask implements Runnable {
                 int FileStartNum = i * SingleFileNum + offset;
                 int FileEndNum = (i + 1) * SingleFileNum;
                 //hadoop每个文件夹都有文件数量上限，所以此处为每个线程执行的上传新建一个目录
-                String dst = NNADDR + HDFSDIR + i + "/";
+                String dst = NNADDR + HDFSDIR + "/Thread-" + i + "/";
                 CheckStatusTask hlt = new CheckStatusTask(dst, FileStartNum, FileEndNum, conf, Latch);
                 ThreadPool.execute(hlt);
             }
