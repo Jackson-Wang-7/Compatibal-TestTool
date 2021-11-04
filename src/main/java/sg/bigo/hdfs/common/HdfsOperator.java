@@ -1,10 +1,8 @@
 package sg.bigo.hdfs.common;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -12,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HdfsOperator {
-    final static Log log = LogFactory.getLog(HdfsOperator.class);
+    final static Logger log = LoggerFactory.getLogger(HdfsOperator.class);
 
     public static boolean putToHDFS(String src, String dst, FileSystem hdfs) {
         Path dstPath = new Path(dst);
@@ -70,6 +68,29 @@ public class HdfsOperator {
             log.warn(src + " list error. exception:", e);
             return null;
         }
+    }
+
+    public static boolean readFile(String src, FileSystem hdfs) {
+        long TTL;
+        try {
+            long start = System.currentTimeMillis();
+            Path srcPath = new Path(src);
+            byte[] b = new byte[1024];
+            int total = 0;
+            int length;
+
+            FSDataInputStream in = hdfs.open(srcPath);
+            while ((length = in.read(b)) > 0) {
+                total = total + length;
+            }
+            TTL = System.currentTimeMillis() - start;
+            log.info("get file length[{}] ttl [{}]", total, TTL);
+        } catch (IOException e) {
+            log.error("read file " + src + " failed! ", e);
+            TTL = -1;
+            return false;
+        }
+        return true;
     }
 
     public static boolean checkFile(String src, FileSystem hdfs) {

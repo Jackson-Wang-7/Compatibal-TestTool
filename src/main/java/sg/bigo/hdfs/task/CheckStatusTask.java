@@ -1,9 +1,9 @@
 package sg.bigo.hdfs.task;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sg.bigo.hdfs.common.HDFSConfig;
 
 import java.io.IOException;
@@ -15,7 +15,7 @@ import static sg.bigo.hdfs.common.HdfsOperator.*;
 
 public class CheckStatusTask implements Runnable {
 
-    final static Log log = LogFactory.getLog(CheckStatusTask.class);
+    final static Logger log = LoggerFactory.getLogger(CheckStatusTask.class);
 
     private String dst;
     private int FileStartNum;

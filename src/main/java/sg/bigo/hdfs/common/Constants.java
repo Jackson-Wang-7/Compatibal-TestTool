@@ -11,6 +11,10 @@ public class Constants {
 
     public static final String VALUE_HOST_DEFAULT = "hdfs://dn1949.jja.bigo:8020";
 
+    public static final String KEY_WEB_HOST = "web_host";
+
+    public static final String VALUE_WEB_HOST_DEFAULT = "hdfs://dn1949.jja.bigo:8020";
+
     public static final String KEY_WORK_PATH = "work_path";
 
     public static final String VALUE_WORK_PATH_DEFAULT = "/";

@@ -1,9 +1,9 @@
 package sg.bigo.hdfs.task;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sg.bigo.hdfs.common.HDFSConfig;
 
 import java.io.IOException;
@@ -14,7 +14,7 @@ import java.util.concurrent.*;
 import static sg.bigo.hdfs.common.HdfsOperator.*;
 
 public class DeleteTask implements Runnable {
-    final static Log log = LogFactory.getLog(DeleteTask.class);
+    final static Logger log = LoggerFactory.getLogger(DeleteTask.class);
 
     private static volatile Queue queue = new ArrayBlockingQueue<String>(10000);
     private Configuration conf;

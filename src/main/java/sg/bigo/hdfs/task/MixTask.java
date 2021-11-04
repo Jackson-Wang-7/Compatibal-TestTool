@@ -1,13 +1,13 @@
 package sg.bigo.hdfs.task;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sg.bigo.hdfs.HdfsTest;
 import sg.bigo.hdfs.common.HDFSConfig;
 
 public class MixTask {
-    final static Log log = LogFactory.getLog(MixTask.class);
+    final static Logger log = LoggerFactory.getLogger(MixTask.class);
 
     public static void doTask(Configuration conf) {
         String ops = HDFSConfig.getInstance().getMixOps();

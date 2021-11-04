@@ -11,26 +11,24 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static sg.bigo.hdfs.common.HdfsOperator.*;
+import static sg.bigo.hdfs.common.HdfsOperator.readFile;
 
-public class CreateTask implements Runnable {
+public class ReadFileTask implements Runnable {
 
-    final static Logger log = LoggerFactory.getLogger(CreateTask.class);
+    final static Logger log = LoggerFactory.getLogger(ReadFileTask.class);
 
-    private String src;
     private String dst;
     private int FileStartNum;
     private int FileEndNum;
     private Configuration conf;
-    private CountDownLatch Latch;
+    private CountDownLatch latch;
 
-    public CreateTask(String src, String dst, int fileStartNum, int fileEndNum, Configuration conf, CountDownLatch latch) {
-        this.src = src;
+    public ReadFileTask(String dst, int fileStartNum, int fileEndNum, Configuration conf, CountDownLatch latch) {
         this.dst = dst;
         FileStartNum = fileStartNum;
         FileEndNum = fileEndNum;
         this.conf = conf;
-        Latch = latch;
+        this.latch = latch;
     }
 
     public static void doTask(Configuration conf) {
@@ -40,7 +38,6 @@ public class CreateTask implements Runnable {
         int SingleFileNum = totalFiles / totalThreads;
         String NNADDR = HDFSConfig.getInstance().getHost();
         String HDFSDIR = HDFSConfig.getInstance().getWorkPath();
-        String src = HDFSConfig.getInstance().getPutFilePath();
         ExecutorService ThreadPool = Executors.newFixedThreadPool(totalThreads);
         CountDownLatch Latch = new CountDownLatch(totalThreads);
 
@@ -49,15 +46,14 @@ public class CreateTask implements Runnable {
                 int FileStartNum = i * SingleFileNum + offset;
                 int FileEndNum = (i + 1) * SingleFileNum;
                 //hadoop每个文件夹都有文件数量上限，所以此处为每个线程执行的上传新建一个目录
-
                 String dst = NNADDR + HDFSDIR + "/Thread-" + i + "/";
-                CreateTask hlt = new CreateTask(src, dst, FileStartNum, FileEndNum, conf, Latch);
+                ReadFileTask hlt = new ReadFileTask(dst, FileStartNum, FileEndNum, conf, Latch);
                 ThreadPool.execute(hlt);
             }
             Latch.await();
             ThreadPool.shutdown();
         } catch (InterruptedException e) {
-            log.warn("CreateTask: execute task error,exception:", e);
+            log.warn("CheckStatusTask: execute task error,exception:", e);
         }
     }
 
@@ -70,14 +66,15 @@ public class CreateTask implements Runnable {
             String putFilePrefix = HDFSConfig.getInstance().getWriteFilePrefix();
             for (int n = FileStartNum; n < FileEndNum; n++) {
                 String tmpdst = dst + putFilePrefix + n;
-                boolean ret = putToHDFS(src, tmpdst, hdfs);
+                boolean ret = readFile(tmpdst, hdfs);
                 if (!ret) {
-                    log.warn("write : put file to hdfs failed, file:" + tmpdst);
+                    log.warn("read file error,file:" + tmpdst);
                 }
             }
-            Latch.countDown();
         } catch (IOException e) {
-            log.error("write task exception:", e);
+            log.error("read task exception:", e);
+        } finally {
+            latch.countDown();
         }
 
     }

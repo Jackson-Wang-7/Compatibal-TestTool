@@ -1,21 +1,18 @@
 package sg.bigo.hdfs;
 
 import lombok.SneakyThrows;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sg.bigo.hdfs.common.HDFSConfig;
-import sg.bigo.hdfs.task.CheckStatusTask;
-import sg.bigo.hdfs.task.CreateTask;
-import sg.bigo.hdfs.task.DeleteTask;
-import sg.bigo.hdfs.task.MixTask;
+import sg.bigo.hdfs.task.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
 
 
 public class HdfsTest {
-    final static Log log = LogFactory.getLog(HdfsTest.class);
+    final static Logger log = LoggerFactory.getLogger(HdfsTest.class);
 
     @SneakyThrows
     public static void main(String[] args) {
@@ -66,6 +63,14 @@ public class HdfsTest {
 
             case "delete":
                 DeleteTask.doTask(conf);
+                break;
+
+            case "read":
+                ReadFileTask.doTask(conf);
+                break;
+
+            case "rest_read":
+                RestReadFileTask.doTask(conf);
                 break;
 
             case "mix":

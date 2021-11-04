@@ -8,6 +8,7 @@ public class HDFSConfig {
     private static HDFSConfig config = new HDFSConfig();
 
     private String host;
+    private String restHost;
     private String opName;
     private String workPath;
     private String configPath;
@@ -29,6 +30,7 @@ public class HDFSConfig {
         props.load(new FileInputStream(Constants.properties));
 
         host = props.getProperty(Constants.KEY_HOST, Constants.VALUE_HOST_DEFAULT);
+        restHost = props.getProperty(Constants.KEY_WEB_HOST, Constants.VALUE_WEB_HOST_DEFAULT);
         opName = props.getProperty(Constants.KEY_OPERATION_NAME, Constants.VALUE_OPERATION_NAME_DEFAULT);
         workPath = props.getProperty(Constants.KEY_WORK_PATH, Constants.VALUE_WORK_PATH_DEFAULT);
         configPath = props.getProperty(Constants.KEY_CONFIG_PATH, Constants.VALUE_CONFIG_DEFAULT);
@@ -44,6 +46,10 @@ public class HDFSConfig {
 
     public String getHost() {
         return host;
+    }
+
+    public String getRestHost() {
+        return restHost;
     }
 
     public String getOpName() {
