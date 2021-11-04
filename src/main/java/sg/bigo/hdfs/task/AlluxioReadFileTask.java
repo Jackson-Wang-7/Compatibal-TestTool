@@ -71,28 +71,31 @@ public class AlluxioReadFileTask implements Runnable {
         System.setProperty("HADOOP_USER_NAME", "hdfs");
         FileSystem fs = FileSystem.Factory.get();
         String putFilePrefix = HDFSConfig.getInstance().getWriteFilePrefix();
-        for (int n = FileStartNum; n < FileEndNum; n++) {
-            String tmpdst = dst + putFilePrefix + n;
-            long TTL;
-            try {
-                long start = System.currentTimeMillis();
-                AlluxioURI srcPath = new AlluxioURI(tmpdst);
-                byte[] b = new byte[1024];
-                int total = 0;
-                int length;
+        try {
+            for (int n = FileStartNum; n < FileEndNum; n++) {
+                String tmpdst = dst + putFilePrefix + n;
+                long TTL;
+                try {
+                    long start = System.currentTimeMillis();
+                    AlluxioURI srcPath = new AlluxioURI(tmpdst);
+                    byte[] b = new byte[1024];
+                    int total = 0;
+                    int length;
 
-                FileInStream in = fs.openFile(srcPath);
-                while ((length = in.read(b)) > 0) {
-                    total = total + length;
+                    FileInStream in = fs.openFile(srcPath);
+                    while ((length = in.read(b)) > 0) {
+                        total = total + length;
+                    }
+                    TTL = System.currentTimeMillis() - start;
+                    log.info("get file length[{}] ttl [{}]", total, TTL);
+                } catch (Exception e) {
+                    log.error("read file " + tmpdst + " failed! ", e);
+                    TTL = -1;
                 }
-                TTL = System.currentTimeMillis() - start;
-                log.info("get file length[{}] ttl [{}]", total, TTL);
-            } catch (Exception e) {
-                log.error("read file " + tmpdst + " failed! ", e);
-                TTL = -1;
             }
+        } finally {
+            latch.countDown();
         }
-        latch.countDown();
 
     }
 }

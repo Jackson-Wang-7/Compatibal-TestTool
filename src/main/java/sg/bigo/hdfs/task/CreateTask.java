@@ -75,9 +75,10 @@ public class CreateTask implements Runnable {
                     log.warn("write : put file to hdfs failed, file:" + tmpdst);
                 }
             }
-            Latch.countDown();
         } catch (IOException e) {
             log.error("write task exception:", e);
+        } finally {
+            Latch.countDown();
         }
 
     }

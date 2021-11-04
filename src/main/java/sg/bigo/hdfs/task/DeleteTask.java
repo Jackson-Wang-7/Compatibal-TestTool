@@ -53,25 +53,28 @@ public class DeleteTask implements Runnable {
 
     @Override
     public void run() {
-        System.setProperty("HADOOP_HOME", "/usr/hdp/3.1.0.0-78/hadoop");
-        System.setProperty("HADOOP_USER_NAME", "hdfs");
-        while (!queue.isEmpty()) {
-            String target = (String) queue.poll();
-            if (target == null) {
-                break;
-            }
-
-            try {
-                FileSystem hdfs = FileSystem.get(conf);
-                boolean ret = delete(target, hdfs);
-                if (!ret) {
-                    log.warn("DeleteTask: delete task failed, file:" + target);
+        try {
+            System.setProperty("HADOOP_HOME", "/usr/hdp/3.1.0.0-78/hadoop");
+            System.setProperty("HADOOP_USER_NAME", "hdfs");
+            while (!queue.isEmpty()) {
+                String target = (String) queue.poll();
+                if (target == null) {
+                    break;
                 }
-            } catch (IOException e) {
-                log.error("delete task exception:", e);
+
+                try {
+                    FileSystem hdfs = FileSystem.get(conf);
+                    boolean ret = delete(target, hdfs);
+                    if (!ret) {
+                        log.warn("DeleteTask: delete task failed, file:" + target);
+                    }
+                } catch (IOException e) {
+                    log.error("delete task exception:", e);
+                }
             }
+        } finally {
+            latch.countDown();
         }
-        latch.countDown();
     }
 
 }

@@ -70,9 +70,10 @@ public class CheckStatusTask implements Runnable {
                     log.warn("Check Status : check file error,file:" + tmpdst);
                 }
             }
-            latch.countDown();
         } catch (IOException e) {
             log.error("read task exception:", e);
+        } finally {
+            latch.countDown();
         }
 
     }
