@@ -4,8 +4,7 @@ import org.apache.hadoop.fs.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,6 +87,28 @@ public class HdfsOperator {
         } catch (IOException e) {
             log.error("read file " + src + " failed! ", e);
             TTL = -1;
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean preadFileToLocal(String src, String dst, FileSystem hdfs) {
+        try {
+            Path srcPath = new Path(src);
+            byte[] b = new byte[1048576];
+            int position = 0;
+            int length;
+
+            FSDataInputStream in = hdfs.open(srcPath);
+            File file = new File(dst);
+            FileOutputStream fileOut = new FileOutputStream(file, true);
+            while ((length = in.read(position, b, 0 ,1048576)) > 0) {
+                fileOut.write(b, 0, length);
+                position = position + length;
+            }
+            log.warn("path [{}] read size: {}.", src, position);
+        } catch (IOException e) {
+            log.error("read file " + src + " failed! ", e);
             return false;
         }
         return true;

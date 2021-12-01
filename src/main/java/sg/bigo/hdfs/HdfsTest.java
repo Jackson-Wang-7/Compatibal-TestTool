@@ -69,6 +69,10 @@ public class HdfsTest {
                 ReadFileTask.doTask(conf);
                 break;
 
+            case "pread":
+                PReadFileTask.doTask(conf);
+                break;
+
             case "rest_read":
                 RestReadFileTask.doTask(conf);
                 break;
