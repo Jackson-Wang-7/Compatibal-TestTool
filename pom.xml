@@ -132,12 +132,12 @@
             <version>${hadoop.version}</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>org.alluxio</groupId>
-            <artifactId>alluxio-core-client-hdfs</artifactId>
-            <version>${alluxio.version}</version>
-            <scope>compile</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.alluxio</groupId>-->
+<!--            <artifactId>alluxio-core-client-hdfs</artifactId>-->
+<!--            <version>${alluxio.version}</version>-->
+<!--            <scope>compile</scope>-->
+<!--        </dependency>-->
     </dependencies>
 
 </project>

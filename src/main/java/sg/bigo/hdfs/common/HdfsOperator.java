@@ -74,7 +74,7 @@ public class HdfsOperator {
         try {
             long start = System.currentTimeMillis();
             Path srcPath = new Path(src);
-            byte[] b = new byte[1024];
+            byte[] b = new byte[1048576];
             int total = 0;
             int length;
 
@@ -86,7 +86,28 @@ public class HdfsOperator {
             log.info("get file length[{}] ttl [{}]", total, TTL);
         } catch (IOException e) {
             log.error("read file " + src + " failed! ", e);
-            TTL = -1;
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean readFileToLocal(String src, String dst, FileSystem hdfs) {
+        try {
+            Path srcPath = new Path(src);
+            byte[] b = new byte[1048576];
+            int total = 0;
+            int length;
+
+            FSDataInputStream in = hdfs.open(srcPath);
+            File file = new File(dst);
+            FileOutputStream fileOut = new FileOutputStream(file, true);
+            while ((length = in.read(b)) > 0) {
+                fileOut.write(b, 0, length);
+                total = total + length;
+            }
+            log.warn("path [{}] read size: {}.", src, total);
+        } catch (IOException e) {
+            log.error("read file " + src + " failed! ", e);
             return false;
         }
         return true;

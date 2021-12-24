@@ -69,6 +69,10 @@ public class HdfsTest {
                 ReadFileTask.doTask(conf);
                 break;
 
+            case "readTotal":
+                ReadTotalTask.doTask(conf);
+                break;
+
             case "pread":
                 PReadFileTask.doTask(conf);
                 break;
