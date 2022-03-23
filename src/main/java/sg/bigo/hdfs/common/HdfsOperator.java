@@ -1,10 +1,14 @@
 package sg.bigo.hdfs.common;
 
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.hadoop.fs.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -112,6 +116,106 @@ public class HdfsOperator {
         }
         return true;
     }
+    /**
+     * 用于diff操作
+     * @param hdfsPath HDFS中的文件路径
+     * @param localFilePath 本地文件路径
+     * @param hdfs HDFS文件系统
+     * @return
+     */
+    public static boolean readFileCheck(String hdfsPath, String localFilePath, FileSystem hdfs) {
+        try {
+            Path srcPath = new Path(hdfsPath);
+            int bufferSize = 1 * 1024 * 1024;
+            byte[] bufferFromHdfs = new byte[bufferSize];
+            byte[] localBuffer = new byte[bufferSize];
+            int total = 0;
+            int len = 0;
+            MessageDigest md5forhdfs = MessageDigest.getInstance("MD5");
+            MessageDigest md5forlocal = MessageDigest.getInstance("MD5");
+
+            FSDataInputStream in = hdfs.open(srcPath);
+            // 本地上传的文件
+            File file = new File(localFilePath);
+            FileInputStream fileIn = new FileInputStream(file);
+
+            while (-1 != (len = in.read(bufferFromHdfs, 0, bufferSize))) {
+                md5forhdfs.update(bufferFromHdfs, 0, len);
+                total += len;
+            }
+
+            while (-1 != (len = fileIn.read(localBuffer, 0, bufferSize))) {
+                md5forlocal.update(localBuffer, 0, len);
+            }
+            String hdfsMd5 = new String(Hex.encodeHex(md5forhdfs.digest()));
+            String localMd5 = new String(Hex.encodeHex(md5forlocal.digest()));
+            if (!StringUtils.equals(hdfsMd5, localMd5)) {
+                log.error("file {} is in inconsistent state ", hdfsPath);
+            } else {
+                log.info("read file {} length {} success.", hdfsPath, total);
+            }
+        } catch (IOException | NoSuchAlgorithmException e) {
+            log.error("read file " + hdfsPath + " failed! ", e);
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean diffMd5(String hdfsPath,String md5,FileSystem hdfs) {
+
+        try {
+            Path srcPath = new Path(hdfsPath);
+            int bufferSize = 1 * 1024 * 1024;
+            byte[] bufferFromHdfs = new byte[bufferSize];
+            int total = 0;
+            int len = 0;
+            MessageDigest md5forhdfs = MessageDigest.getInstance("MD5");
+            FSDataInputStream in = hdfs.open(srcPath);
+            while (-1 != (len = in.read(bufferFromHdfs, 0, bufferSize))) {
+                md5forhdfs.update(bufferFromHdfs, 0, len);
+                total += len;
+            }
+            String hdfsMd5 = new String(Hex.encodeHex(md5forhdfs.digest()));
+            if (!StringUtils.equals(hdfsMd5, md5)) {
+                log.error("file {} is in inconsistent state ", hdfsPath);
+            } else {
+                log.info("read file {} length {} success.", hdfsPath, total);
+            }
+        } catch (IOException | NoSuchAlgorithmException e) {
+            log.error("read file " + hdfsPath + " failed! ", e);
+            return false;
+        }
+        return true;
+    }
+
+    public static String getLocalFileMd5(String filePath) throws IOException {
+        try {
+            int bufferSize = 1 * 1024 * 1024;
+            byte[] localBuffer = new byte[1024 * 1024];
+            // 本地上传的文件
+            File file = new File(filePath);
+            FileInputStream fileIn = new FileInputStream(file);
+            int len=0;
+
+            MessageDigest md5forlocal = MessageDigest.getInstance("MD5");
+            while (-1 != (len = fileIn.read(localBuffer, 0, bufferSize))) {
+                md5forlocal.update(localBuffer, 0, len);
+            }
+            return new String(Hex.encodeHex(md5forlocal.digest()));
+        } catch (IOException | NoSuchAlgorithmException e) {
+            log.error("read local file " + filePath + " failed! ", e);
+            throw new IOException(e);
+        }
+    }
+
+    public static long getLocalFileSize(String filePath) {
+        File file = new File(filePath);
+        if (!file.exists() || !file.isFile()) {
+            log.warn("file {} is not exist.", filePath);
+            return -1;
+        }
+        return file.length();
+    }
 
     public static boolean preadFileToLocal(String src, String dst, FileSystem hdfs) {
         try {
@@ -125,6 +229,32 @@ public class HdfsOperator {
             FileOutputStream fileOut = new FileOutputStream(file, true);
             while ((length = in.read(position, b, 0 ,1048576)) > 0) {
                 fileOut.write(b, 0, length);
+                position = position + length;
+            }
+            log.warn("path [{}] read size: {}.", src, position);
+        } catch (IOException e) {
+            log.error("read file " + src + " failed! ", e);
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean preadFileCheck(String src, String dst, FileSystem hdfs) {
+        try {
+            Path srcPath = new Path(src);
+            byte[] bufferFromHdfs = new byte[1048576];
+            byte[] localBuffer = new byte[1048576];
+            int position = 0;
+            int length;
+
+            FSDataInputStream in = hdfs.open(srcPath);
+            File file = new File(dst);
+//            FileOutputStream fileOut = new FileOutputStream(file, true);
+            FileInputStream fileIn = new FileInputStream(file);
+            while ((length = in.read(position, bufferFromHdfs, 0 ,1048576)) > 0) {
+                fileIn.read(localBuffer, 0, length);
+                // todo  比较 bufferFromHdfs的内容和localBuffer的内容
+
                 position = position + length;
             }
             log.warn("path [{}] read size: {}.", src, position);

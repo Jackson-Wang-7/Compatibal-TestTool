@@ -81,6 +81,10 @@ public class HdfsTest {
                 RestReadFileTask.doTask(conf);
                 break;
 
+            case "diff":
+                DiffTask.doTask(conf);
+                break;
+
             case "mix":
                 MixTask.doTask(conf);
                 break;
