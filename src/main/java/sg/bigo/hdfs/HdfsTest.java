@@ -28,6 +28,7 @@ public class HdfsTest {
         conf.addResource(new File(CONFIG + "/core-site.xml").toURI().toURL());
         conf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
         conf.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+        conf.setBoolean("fs.hdfs.impl.disable.cache", false);
         conf.setClassLoader(HdfsTest.class.getClassLoader());
         conf.set("fs.defaultFS", NNADDR);
 
@@ -76,10 +77,10 @@ public class HdfsTest {
             case "pread":
                 PReadFileTask.doTask(conf);
                 break;
-
-            case "rest_read":
-                RestReadFileTask.doTask(conf);
-                break;
+//
+//            case "rest_read":
+//                RestReadFileTask.doTask(conf);
+//                break;
 
             case "diff":
                 DiffTask.doTask(conf);

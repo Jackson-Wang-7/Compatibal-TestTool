@@ -67,9 +67,12 @@ public class DiffTask implements Runnable {
         System.setProperty("HADOOP_HOME", "/usr/hdp/3.1.0.0-78/hadoop");
         System.setProperty("HADOOP_USER_NAME", "hdfs");
         try {
-            String localfileMd5 = getLocalFileMd5(localFilePath);
-            log.warn("local file md5 is {},md5 length is {}", localfileMd5, localfileMd5.length());
             long localfileLth = getLocalFileSize(localFilePath);
+            if (localfileLth == -1) {
+                return;
+            }
+            String localfileMd5 = getLocalFileMd5(localFilePath);
+            log.warn("local file md5 is {},file length is {}", localfileMd5, localfileLth);
             FileSystem hdfs = FileSystem.get(conf);
             String putFilePrefix = HDFSConfig.getInstance().getWriteFilePrefix();
             for (int n = FileStartNum; n < FileEndNum; n++) {

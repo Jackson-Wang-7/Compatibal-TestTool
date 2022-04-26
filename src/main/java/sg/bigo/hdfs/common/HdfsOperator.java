@@ -75,14 +75,14 @@ public class HdfsOperator {
 
     public static boolean readFile(String src, FileSystem hdfs) {
         long TTL;
+        long start = System.currentTimeMillis();
+        Path srcPath = new Path(src);
+        byte[] b = new byte[1048576];
+        int total = 0;
+        int length;
+        FSDataInputStream in = null;
         try {
-            long start = System.currentTimeMillis();
-            Path srcPath = new Path(src);
-            byte[] b = new byte[1048576];
-            int total = 0;
-            int length;
-
-            FSDataInputStream in = hdfs.open(srcPath);
+            in = hdfs.open(srcPath);
             while ((length = in.read(b)) > 0) {
                 total = total + length;
             }
@@ -91,6 +91,14 @@ public class HdfsOperator {
         } catch (IOException e) {
             log.error("read file " + src + " failed! ", e);
             return false;
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ioException) {
+                    log.warn("read file " + src + " close stream failed. ");
+                }
+            }
         }
         return true;
     }
@@ -124,20 +132,22 @@ public class HdfsOperator {
      * @return
      */
     public static boolean readFileCheck(String hdfsPath, String localFilePath, FileSystem hdfs) {
+        Path srcPath = new Path(hdfsPath);
+        int bufferSize = 1 * 1024 * 1024;
+        byte[] bufferFromHdfs = new byte[bufferSize];
+        byte[] localBuffer = new byte[bufferSize];
+        int total = 0;
+        int len = 0;
+        FSDataInputStream in = null;
+        FileInputStream fileIn = null;
         try {
-            Path srcPath = new Path(hdfsPath);
-            int bufferSize = 1 * 1024 * 1024;
-            byte[] bufferFromHdfs = new byte[bufferSize];
-            byte[] localBuffer = new byte[bufferSize];
-            int total = 0;
-            int len = 0;
             MessageDigest md5forhdfs = MessageDigest.getInstance("MD5");
             MessageDigest md5forlocal = MessageDigest.getInstance("MD5");
 
-            FSDataInputStream in = hdfs.open(srcPath);
+            in = hdfs.open(srcPath);
             // 本地上传的文件
             File file = new File(localFilePath);
-            FileInputStream fileIn = new FileInputStream(file);
+            fileIn = new FileInputStream(file);
 
             while (-1 != (len = in.read(bufferFromHdfs, 0, bufferSize))) {
                 md5forhdfs.update(bufferFromHdfs, 0, len);
@@ -157,20 +167,37 @@ public class HdfsOperator {
         } catch (IOException | NoSuchAlgorithmException e) {
             log.error("read file " + hdfsPath + " failed! ", e);
             return false;
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ioException) {
+                    log.warn("read file " + hdfsPath + " close stream failed. ");
+                }
+            }
+
+            if (fileIn != null) {
+                try {
+                    fileIn.close();
+                } catch (IOException ioException) {
+                    //do nothing
+                }
+            }
         }
         return true;
     }
 
     public static boolean diffMd5(String hdfsPath,String md5,FileSystem hdfs) {
 
+        Path srcPath = new Path(hdfsPath);
+        int bufferSize = 1 * 1024 * 1024;
+        byte[] bufferFromHdfs = new byte[bufferSize];
+        int total = 0;
+        int len = 0;
+        FSDataInputStream in = null;
         try {
-            Path srcPath = new Path(hdfsPath);
-            int bufferSize = 1 * 1024 * 1024;
-            byte[] bufferFromHdfs = new byte[bufferSize];
-            int total = 0;
-            int len = 0;
+            in = hdfs.open(srcPath);
             MessageDigest md5forhdfs = MessageDigest.getInstance("MD5");
-            FSDataInputStream in = hdfs.open(srcPath);
             while (-1 != (len = in.read(bufferFromHdfs, 0, bufferSize))) {
                 md5forhdfs.update(bufferFromHdfs, 0, len);
                 total += len;
@@ -179,22 +206,31 @@ public class HdfsOperator {
             if (!StringUtils.equals(hdfsMd5, md5)) {
                 log.error("file {} is in inconsistent state ", hdfsPath);
             } else {
-                log.info("read file {} length {} success.", hdfsPath, total);
+                log.debug("read file {} length {} success.", hdfsPath, total);
             }
         } catch (IOException | NoSuchAlgorithmException e) {
             log.error("read file " + hdfsPath + " failed! ", e);
             return false;
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ioException) {
+                    log.warn("read file " + hdfsPath + " close stream failed. ");
+                }
+            }
         }
         return true;
     }
 
     public static String getLocalFileMd5(String filePath) throws IOException {
+        int bufferSize = 1 * 1024 * 1024;
+        byte[] localBuffer = new byte[1024 * 1024];
+        // 本地上传的文件
+        File file = new File(filePath);
+        FileInputStream fileIn = null;
         try {
-            int bufferSize = 1 * 1024 * 1024;
-            byte[] localBuffer = new byte[1024 * 1024];
-            // 本地上传的文件
-            File file = new File(filePath);
-            FileInputStream fileIn = new FileInputStream(file);
+            fileIn = new FileInputStream(file);
             int len=0;
 
             MessageDigest md5forlocal = MessageDigest.getInstance("MD5");
@@ -205,6 +241,10 @@ public class HdfsOperator {
         } catch (IOException | NoSuchAlgorithmException e) {
             log.error("read local file " + filePath + " failed! ", e);
             throw new IOException(e);
+        } finally {
+            if (fileIn != null) {
+                fileIn.close();
+            }
         }
     }
 
