@@ -1,4 +1,4 @@
-package sg.bigo.hdfs.common;
+package com.wyy.hdfs.common;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.binary.StringUtils;

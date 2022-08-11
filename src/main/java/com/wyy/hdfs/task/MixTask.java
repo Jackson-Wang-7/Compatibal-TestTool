@@ -1,10 +1,10 @@
-package sg.bigo.hdfs.task;
+package com.wyy.hdfs.task;
 
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sg.bigo.hdfs.HdfsTest;
-import sg.bigo.hdfs.common.HDFSConfig;
+import com.wyy.hdfs.HdfsTest;
+import com.wyy.hdfs.common.HDFSConfig;
 
 public class MixTask {
     final static Logger log = LoggerFactory.getLogger(MixTask.class);

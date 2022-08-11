@@ -1,4 +1,4 @@
-package sg.bigo.hdfs.common;
+package com.wyy.hdfs.common;
 
 import java.io.FileInputStream;
 import java.io.IOException;

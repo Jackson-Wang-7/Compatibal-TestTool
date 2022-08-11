@@ -1,21 +1,21 @@
-package sg.bigo.hdfs.task;
+package com.wyy.hdfs.task;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sg.bigo.hdfs.common.HDFSConfig;
+import com.wyy.hdfs.common.HDFSConfig;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static sg.bigo.hdfs.common.HdfsOperator.*;
+import static com.wyy.hdfs.common.HdfsOperator.readFile;
 
-public class PReadFileTask implements Runnable {
+public class ReadFileTask implements Runnable {
 
-    final static Logger log = LoggerFactory.getLogger(PReadFileTask.class);
+    final static Logger log = LoggerFactory.getLogger(ReadFileTask.class);
 
     private String dst;
     private int FileStartNum;
@@ -23,7 +23,7 @@ public class PReadFileTask implements Runnable {
     private Configuration conf;
     private CountDownLatch latch;
 
-    public PReadFileTask(String dst, int fileStartNum, int fileEndNum, Configuration conf, CountDownLatch latch) {
+    public ReadFileTask(String dst, int fileStartNum, int fileEndNum, Configuration conf, CountDownLatch latch) {
         this.dst = dst;
         FileStartNum = fileStartNum;
         FileEndNum = fileEndNum;
@@ -47,7 +47,7 @@ public class PReadFileTask implements Runnable {
                 int FileEndNum = (i + 1) * SingleFileNum;
                 //hadoop每个文件夹都有文件数量上限，所以此处为每个线程执行的上传新建一个目录
                 String dst = NNADDR + HDFSDIR + "/Thread-" + i + "/";
-                PReadFileTask hlt = new PReadFileTask(dst, FileStartNum, FileEndNum, conf, Latch);
+                ReadFileTask hlt = new ReadFileTask(dst, FileStartNum, FileEndNum, conf, Latch);
                 ThreadPool.execute(hlt);
             }
             Latch.await();
@@ -65,11 +65,11 @@ public class PReadFileTask implements Runnable {
             FileSystem hdfs = FileSystem.get(conf);
             String putFilePrefix = HDFSConfig.getInstance().getWriteFilePrefix();
             for (int n = FileStartNum; n < FileEndNum; n++) {
-                String tmpsrc = dst + putFilePrefix + n;
-                String tmpdst = putFilePrefix + n;
-                boolean ret = preadFileToLocal(tmpsrc, tmpdst, hdfs);
+                String tmpdst = dst + putFilePrefix + n;
+                boolean ret = readFile(tmpdst, hdfs);
+//                boolean ret = readFileToLocal(tmpdst, putFilePrefix + n, hdfs);
                 if (!ret) {
-                    log.warn("read file error,file:" + tmpsrc);
+                    log.warn("read file error,file:" + tmpdst);
                 }
             }
         } catch (IOException e) {

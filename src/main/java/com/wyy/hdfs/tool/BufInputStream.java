@@ -1,4 +1,4 @@
-package sg.bigo.hdfs.tool;
+package com.wyy.hdfs.tool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

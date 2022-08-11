@@ -1,11 +1,18 @@
-package sg.bigo.hdfs;
+package com.wyy.hdfs;
 
+import com.wyy.hdfs.common.HDFSConfig;
+import com.wyy.hdfs.task.CheckStatusTask;
+import com.wyy.hdfs.task.CreateTask;
+import com.wyy.hdfs.task.DeleteTask;
+import com.wyy.hdfs.task.DiffTask;
+import com.wyy.hdfs.task.MixTask;
+import com.wyy.hdfs.task.PReadFileTask;
+import com.wyy.hdfs.task.ReadFileTask;
+import com.wyy.hdfs.task.ReadTotalTask;
 import lombok.SneakyThrows;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sg.bigo.hdfs.common.HDFSConfig;
-import sg.bigo.hdfs.task.*;
 
 import java.io.File;
 import java.io.FileOutputStream;

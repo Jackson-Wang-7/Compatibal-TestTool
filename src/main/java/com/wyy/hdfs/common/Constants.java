@@ -1,4 +1,4 @@
-package sg.bigo.hdfs.common;
+package com.wyy.hdfs.common;
 
 public class Constants {
     public static final String properties = "config.properties";

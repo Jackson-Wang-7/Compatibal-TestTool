@@ -63,7 +63,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>sg.bigo.hdfs.HdfsTest</mainClass>
+                            <mainClass>com.wyy.hdfs.HdfsTest</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -78,7 +78,7 @@
                     </descriptors>
                     <archive>
                         <manifest>
-                            <mainClass>sg.bigo.hdfs.HdfsTest</mainClass>
+                            <mainClass>com.wyy.hdfs.HdfsTest</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -97,8 +97,8 @@
 
     <properties>
         <lombok.version>1.16.20</lombok.version>
-        <hadoop.version>3.1.1.3.1.0.78-4</hadoop.version>
-        <alluxio.version>2.6.0</alluxio.version>
+        <hadoop.version>3.1.1</hadoop.version>
+        <alluxio.version>2.9.0</alluxio.version>
     </properties>
 
     <dependencies>
