@@ -1,17 +1,17 @@
-package com.wyy.hdfs.task;
+package com.wyy.tool.task;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.wyy.hdfs.common.HDFSConfig;
+import com.wyy.tool.common.ToolConfig;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.*;
 
-import static com.wyy.hdfs.common.HdfsOperator.*;
+import static com.wyy.tool.common.ToolOperator.*;
 
 public class DeleteTask implements Runnable {
     final static Logger log = LoggerFactory.getLogger(DeleteTask.class);
@@ -26,8 +26,8 @@ public class DeleteTask implements Runnable {
     }
 
     public static void doTask(Configuration conf) {
-        String deletePathPrefix = HDFSConfig.getInstance().getDeleteFilePrefix();
-        int totalThreads = HDFSConfig.getInstance().getTotalThreads();
+        String deletePathPrefix = ToolConfig.getInstance().getDeleteFilePrefix();
+        int totalThreads = ToolConfig.getInstance().getTotalThreads();
 
         ExecutorService ThreadPool = Executors.newFixedThreadPool(totalThreads);
         CountDownLatch latch = new CountDownLatch(totalThreads);

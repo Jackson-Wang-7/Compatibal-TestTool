@@ -1,22 +1,22 @@
-package com.wyy.hdfs.task;
+package com.wyy.tool.task;
 
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.wyy.hdfs.HdfsTest;
-import com.wyy.hdfs.common.HDFSConfig;
+import com.wyy.tool.BenchmarkTool;
+import com.wyy.tool.common.ToolConfig;
 
-public class MixTask {
-    final static Logger log = LoggerFactory.getLogger(MixTask.class);
+public class LoopTask {
+    final static Logger log = LoggerFactory.getLogger(LoopTask.class);
 
     public static void doTask(Configuration conf) {
-        String ops = HDFSConfig.getInstance().getMixOps();
-        int loopCount = HDFSConfig.getInstance().getLoopCount();
+        String ops = ToolConfig.getInstance().getMixOps();
+        int loopCount = ToolConfig.getInstance().getLoopCount();
         int count = 1;
         while (count <= loopCount) {
             String[] operations = ops.split(",");
             for (String op: operations) {
-                HdfsTest.excuteTask(op, conf);
+                BenchmarkTool.excuteTask(op, conf);
             }
             log.info("MixTask: finished a mix task , current loop:" + count);
             count ++;

@@ -1,10 +1,10 @@
-package com.wyy.hdfs.task;
+package com.wyy.tool.task;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.wyy.hdfs.common.HDFSConfig;
+import com.wyy.tool.common.ToolConfig;
 
 import java.io.IOException;
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static com.wyy.hdfs.common.HdfsOperator.*;
+import static com.wyy.tool.common.ToolOperator.*;
 
 public class ReadTotalTask implements Runnable {
 
@@ -31,9 +31,9 @@ public class ReadTotalTask implements Runnable {
     }
 
     public static void doTask(Configuration conf) {
-        int totalThreads = HDFSConfig.getInstance().getTotalThreads();
-        String NNADDR = HDFSConfig.getInstance().getHost();
-        String HDFSDIR = HDFSConfig.getInstance().getWorkPath();
+        int totalThreads = ToolConfig.getInstance().getTotalThreads();
+        String NNADDR = ToolConfig.getInstance().getHost();
+        String HDFSDIR = ToolConfig.getInstance().getWorkPath();
         ExecutorService ThreadPool = Executors.newFixedThreadPool(totalThreads);
         CountDownLatch Latch = new CountDownLatch(totalThreads);
 

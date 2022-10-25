@@ -1,6 +1,6 @@
-package com.wyy.hdfs.task;
+package com.wyy.tool.task;
 
-import com.wyy.hdfs.common.HDFSConfig;
+import com.wyy.tool.common.ToolConfig;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -34,11 +34,11 @@ public class RestReadFileTask implements Runnable {
     }
 
     public static void doTask(Configuration conf) {
-        int totalFiles = HDFSConfig.getInstance().getTotalFiles();
-        int totalThreads = HDFSConfig.getInstance().getTotalThreads();
-        int offset = HDFSConfig.getInstance().getFileOffset();
+        int totalFiles = ToolConfig.getInstance().getTotalFiles();
+        int totalThreads = ToolConfig.getInstance().getTotalThreads();
+        int offset = ToolConfig.getInstance().getFileOffset();
         int SingleFileNum = totalFiles / totalThreads;
-        String HDFSDIR = HDFSConfig.getInstance().getWorkPath();
+        String HDFSDIR = ToolConfig.getInstance().getWorkPath();
         ExecutorService ThreadPool = Executors.newFixedThreadPool(totalThreads);
         CountDownLatch Latch = new CountDownLatch(totalThreads);
 
@@ -60,7 +60,7 @@ public class RestReadFileTask implements Runnable {
 
     @Override
     public void run() {
-        String putFilePrefix = HDFSConfig.getInstance().getWriteFilePrefix();
+        String putFilePrefix = ToolConfig.getInstance().getWriteFilePrefix();
         for (int n = FileStartNum; n < FileEndNum; n++) {
             long start = System.currentTimeMillis();
             long TTL = -1;
@@ -116,7 +116,7 @@ public class RestReadFileTask implements Runnable {
 
 
             CloseableHttpClient httpClient = HttpClients.createDefault();
-            String openUrl = "http://" + HDFSConfig.getInstance().getRestHost() + "/api/v1/paths/" + tmpdst + "/open-file";
+            String openUrl = "http://" + ToolConfig.getInstance().getRestHost() + "/api/v1/paths/" + tmpdst + "/open-file";
             String body = "{\"readType\":\"CACHE\"}";
             HttpPost openReq = new HttpPost(openUrl);
             openReq.setHeader("Content-Type", "application/json");
@@ -158,7 +158,7 @@ public class RestReadFileTask implements Runnable {
                 }
             }
 
-            String readUrl = "http://" + HDFSConfig.getInstance().getRestHost() + "/api/v1/streams/" + streamid + "/read";
+            String readUrl = "http://" + ToolConfig.getInstance().getRestHost() + "/api/v1/streams/" + streamid + "/read";
             HttpPost readReq = new HttpPost(readUrl);
             readReq.setHeader("Connection", "Keep-Alive");
             CloseableHttpResponse readResp = null;
@@ -193,7 +193,7 @@ public class RestReadFileTask implements Runnable {
                 }
             }
 
-            String closeUrl = "http://" + HDFSConfig.getInstance().getRestHost() + "/api/v1/streams/" + streamid + "/close";
+            String closeUrl = "http://" + ToolConfig.getInstance().getRestHost() + "/api/v1/streams/" + streamid + "/close";
             HttpPost closeReq = new HttpPost(closeUrl);
             closeReq.setHeader("Connection", "Keep-Alive");
 

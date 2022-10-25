@@ -63,7 +63,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>com.wyy.hdfs.HdfsTest</mainClass>
+                            <mainClass>com.wyy.tool.BenchmarkTool</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -78,7 +78,7 @@
                     </descriptors>
                     <archive>
                         <manifest>
-                            <mainClass>com.wyy.hdfs.HdfsTest</mainClass>
+                            <mainClass>com.wyy.tool.BenchmarkTool</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

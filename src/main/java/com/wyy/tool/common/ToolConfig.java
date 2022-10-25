@@ -1,11 +1,11 @@
-package com.wyy.hdfs.common;
+package com.wyy.tool.common;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
 
-public class HDFSConfig {
-    private static HDFSConfig config = new HDFSConfig();
+public class ToolConfig {
+    private static ToolConfig config = new ToolConfig();
 
     private String host;
     private String restHost;
@@ -21,7 +21,7 @@ public class HDFSConfig {
     private String mixOps;
     private int loopCount;
 
-    public static HDFSConfig getInstance() {
+    public static ToolConfig getInstance() {
         return config;
     }
 

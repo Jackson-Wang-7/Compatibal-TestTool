@@ -1,4 +1,4 @@
-package com.wyy.hdfs.common;
+package com.wyy.tool.common;
 
 public class Constants {
     public static final String properties = "config.properties";
@@ -9,11 +9,11 @@ public class Constants {
 
     public static final String KEY_HOST = "host";
 
-    public static final String VALUE_HOST_DEFAULT = "hdfs://dn1949.jja.bigo:8020";
+    public static final String VALUE_HOST_DEFAULT = "hdfs://xx:8020";
 
     public static final String KEY_WEB_HOST = "web_host";
 
-    public static final String VALUE_WEB_HOST_DEFAULT = "hdfs://dn1949.jja.bigo:8020";
+    public static final String VALUE_WEB_HOST_DEFAULT = "hdfs://xx:8020";
 
     public static final String KEY_WORK_PATH = "work_path";
 

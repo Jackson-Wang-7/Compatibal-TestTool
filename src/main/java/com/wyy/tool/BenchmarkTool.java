@@ -1,14 +1,14 @@
-package com.wyy.hdfs;
+package com.wyy.tool;
 
-import com.wyy.hdfs.common.HDFSConfig;
-import com.wyy.hdfs.task.CheckStatusTask;
-import com.wyy.hdfs.task.CreateTask;
-import com.wyy.hdfs.task.DeleteTask;
-import com.wyy.hdfs.task.DiffTask;
-import com.wyy.hdfs.task.MixTask;
-import com.wyy.hdfs.task.PReadFileTask;
-import com.wyy.hdfs.task.ReadFileTask;
-import com.wyy.hdfs.task.ReadTotalTask;
+import com.wyy.tool.common.ToolConfig;
+import com.wyy.tool.task.CheckStatusTask;
+import com.wyy.tool.task.CreateTask;
+import com.wyy.tool.task.DeleteTask;
+import com.wyy.tool.task.DiffTask;
+import com.wyy.tool.task.LoopTask;
+import com.wyy.tool.task.PReadFileTask;
+import com.wyy.tool.task.ReadFileTask;
+import com.wyy.tool.task.ReadTotalTask;
 import lombok.SneakyThrows;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -18,14 +18,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 
 
-public class HdfsTest {
-    final static Logger log = LoggerFactory.getLogger(HdfsTest.class);
+public class BenchmarkTool {
+    final static Logger log = LoggerFactory.getLogger(BenchmarkTool.class);
 
     @SneakyThrows
     public static void main(String[] args) {
-        HDFSConfig.getInstance().loadProperties();
+        ToolConfig.getInstance().loadProperties();
 
-        HDFSConfig config = HDFSConfig.getInstance();
+        ToolConfig config = ToolConfig.getInstance();
         String Operation = config.getOpName();
         String CONFIG = config.getConfigPath();
         String NNADDR = config.getHost();
@@ -36,7 +36,7 @@ public class HdfsTest {
         conf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
         conf.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
         conf.setBoolean("fs.hdfs.impl.disable.cache", false);
-        conf.setClassLoader(HdfsTest.class.getClassLoader());
+        conf.setClassLoader(BenchmarkTool.class.getClassLoader());
         conf.set("fs.defaultFS", NNADDR);
 
         File file = new File("record.txt");
@@ -93,9 +93,12 @@ public class HdfsTest {
                 DiffTask.doTask(conf);
                 break;
 
-            case "mix":
-                MixTask.doTask(conf);
+            case "loop":
+                LoopTask.doTask(conf);
                 break;
+
+            case "mix":
+
 
             default:
                 System.out.println("not support this op.");

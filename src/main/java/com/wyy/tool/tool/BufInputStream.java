@@ -1,4 +1,4 @@
-package com.wyy.hdfs.tool;
+package com.wyy.tool.tool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
