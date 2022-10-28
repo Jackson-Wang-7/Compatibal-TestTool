@@ -60,7 +60,7 @@ public class RestReadFileTask implements Runnable {
 
     @Override
     public void run() {
-        String putFilePrefix = ToolConfig.getInstance().getWriteFilePrefix();
+        String putFilePrefix = ToolConfig.getInstance().getCreateFilePrefix();
         for (int n = FileStartNum; n < FileEndNum; n++) {
             long start = System.currentTimeMillis();
             long TTL = -1;
@@ -112,6 +112,7 @@ public class RestReadFileTask implements Runnable {
 //
 //            TTL = System.currentTimeMillis() - start;
 //            log.info("get file length[{}] ttl [{}]", total, TTL);
+
 
 
 

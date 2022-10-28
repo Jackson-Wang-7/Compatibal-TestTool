@@ -30,3 +30,4 @@ azure-bfs-auth-keys.xml
 */maven-eclipse.xml
 
 .history/
+/test/

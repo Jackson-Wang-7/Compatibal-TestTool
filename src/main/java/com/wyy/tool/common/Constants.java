@@ -7,6 +7,10 @@ public class Constants {
 
     public static final String VALUE_OPERATION_NAME_DEFAULT = "none";
 
+    public static final String KEY_USER_NAME = "user_name";
+
+    public static final String VALUE_USER_NAME_DEFAULT = "root";
+
     public static final String KEY_HOST = "host";
 
     public static final String VALUE_HOST_DEFAULT = "hdfs://xx:8020";
@@ -35,13 +39,25 @@ public class Constants {
 
     public static final String VALUE_FILE_OFFSET_DEFAULT = "0";
 
-    public static final String KEY_PUT_FILE_PATH = "put_file_path";
+    public static final String KEY_CREATE_FILE_NAME_TYPE = "create_file_name_type";
 
-    public static final String VALUE_PUT_FILE_PATH_DEFAULT = "testfile";
+    public static final String VALUE_CREATE_FILE_NAME_DEFAULT = "inOrder";
 
-    public static final String KEY_WRITE_FILE_PREFIX = "write_file_prefix";
+    public static final String KEY_CREATE_FILE_PATH = "create_file_path";
 
-    public static final String VALUE_WRITE_FILE_PREFIX_DEFAULT = "test";
+    public static final String VALUE_CREATE_FILE_PATH_DEFAULT = "/testdir/";
+
+    public static final String KEY_CREATE_SIZE_PER_FILE = "create_size_per_file";
+
+    public static final String VALUE_CREATE_SIZE_PER_FILE_DEFAULT = "1024";
+
+    public static final String KEY_CREATE_FILE_PREFIX = "write_file_prefix";
+
+    public static final String VALUE_CREATE_FILE_PREFIX_DEFAULT = "test";
+
+    public static final String KEY_READ_DURATION_TIME = "read_duration_time";
+
+    public static final String VALUE_READ_DURATION_TIME_DEFAULT = "60";
 
     public static final String KEY_DELETE_FILE_PREFIX = "delete_file_prefix";
 

@@ -42,7 +42,7 @@ public class DiffTask implements Runnable {
         int SingleFileNum = totalFiles / totalThreads;
         String nnPrefix = ToolConfig.getInstance().getHost();
         String workDir = ToolConfig.getInstance().getWorkPath();
-        String localFilePath = ToolConfig.getInstance().getPutFilePath();
+        String localFilePath = ToolConfig.getInstance().getCreateFilePath();
         ExecutorService ThreadPool = Executors.newFixedThreadPool(totalThreads);
         CountDownLatch latch = new CountDownLatch(totalThreads);
 
@@ -74,7 +74,7 @@ public class DiffTask implements Runnable {
             String localfileMd5 = getLocalFileMd5(localFilePath);
             log.warn("local file md5 is {},file length is {}", localfileMd5, localfileLth);
             FileSystem hdfs = FileSystem.get(conf);
-            String putFilePrefix = ToolConfig.getInstance().getWriteFilePrefix();
+            String putFilePrefix = ToolConfig.getInstance().getCreateFilePrefix();
             for (int n = FileStartNum; n < FileEndNum; n++) {
                 String tmpHdfsFilePath = hdfsFilePath + putFilePrefix + n;
                 FileStatus fileInfo = getFileInfo(tmpHdfsFilePath, hdfs);

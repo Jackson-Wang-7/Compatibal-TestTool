@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.example</groupId>
-    <artifactId>HdfsTest</artifactId>
+    <groupId>org.testtool</groupId>
+    <artifactId>Compatibility-TestTool</artifactId>
     <version>1.1-alpha</version>
 
 <!--    <build>-->
@@ -63,7 +63,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
-                            <mainClass>com.wyy.tool.BenchmarkTool</mainClass>
+                            <mainClass>com.wyy.tool.CompatibilityTestTool</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -78,7 +78,7 @@
                     </descriptors>
                     <archive>
                         <manifest>
-                            <mainClass>com.wyy.tool.BenchmarkTool</mainClass>
+                            <mainClass>com.wyy.tool.CompatibilityTestTool</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -97,8 +97,9 @@
 
     <properties>
         <lombok.version>1.16.20</lombok.version>
-        <hadoop.version>3.1.1</hadoop.version>
-        <alluxio.version>2.9.0</alluxio.version>
+        <hadoop.version>3.3.1</hadoop.version>
+        <alluxio.version>enterprise-2.9.0-SNAPSHOT</alluxio.version>
+        <metrics.version>4.2.0</metrics.version>
     </properties>
 
     <dependencies>
@@ -112,47 +113,48 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-hdfs</artifactId>
             <version>${hadoop.version}</version>
-            <scope>compile</scope>
             <exclusions>
                 <exclusion>
                     <groupId>com.google.guava</groupId>
                     <artifactId>guava</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.google.protobuf</groupId>
+                    <artifactId>protobuf-java</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>io.trino.hadoop</groupId>-->
-<!--            <artifactId>hadoop-apache</artifactId>-->
-<!--            <version>3.2.0-13-SNAPSHOT</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.slf4j</groupId>-->
-<!--            <artifactId>slf4j-api</artifactId>-->
-<!--            <version>1.7.25</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.slf4j</groupId>-->
-<!--            <artifactId>slf4j-Log4j12</artifactId>-->
-<!--            <version>1.7.25</version>-->
-<!--        </dependency>-->
         <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-common</artifactId>
-            <version>${hadoop.version}</version>
-            <scope>compile</scope>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>3.19.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-hdfs-client</artifactId>
-            <version>${hadoop.version}</version>
-            <scope>compile</scope>
+            <artifactId>hadoop-aws</artifactId>
+            <version>3.2.2</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.alluxio</groupId>-->
-<!--            <artifactId>alluxio-core-client-hdfs</artifactId>-->
-<!--            <version>${alluxio.version}</version>-->
-<!--            <scope>compile</scope>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+            <version>1.11.563</version>
+        </dependency>
+        <dependency>
+            <groupId>org.alluxio</groupId>
+            <artifactId>alluxio-core-client-hdfs</artifactId>
+            <version>${alluxio.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.protobuf</groupId>
+                    <artifactId>protobuf-java</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+            <version>${metrics.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

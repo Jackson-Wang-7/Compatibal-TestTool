@@ -1,82 +1,143 @@
 package com.wyy.tool.task;
 
+import com.codahale.metrics.Timer;
+import com.wyy.tool.common.MetricsSystem;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.wyy.tool.common.ToolConfig;
 
 import java.io.IOException;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
-import static com.wyy.tool.common.ToolOperator.readFile;
-
-public class ReadFileTask implements Runnable {
-
+public class ReadFileTask extends AbstractTask {
     final static Logger log = LoggerFactory.getLogger(ReadFileTask.class);
 
-    private String dst;
-    private int FileStartNum;
-    private int FileEndNum;
-    private Configuration conf;
-    private CountDownLatch latch;
-
-    public ReadFileTask(String dst, int fileStartNum, int fileEndNum, Configuration conf, CountDownLatch latch) {
-        this.dst = dst;
-        FileStartNum = fileStartNum;
-        FileEndNum = fileEndNum;
-        this.conf = conf;
-        this.latch = latch;
+    public ReadFileTask(Configuration conf) {
+        super(conf);
+        qpsMeter = MetricsSystem.meter(this.getClass(), "request", "qps");
+        iopsMeter = MetricsSystem.meter(this.getClass(), "request", "iops");
+        timer = MetricsSystem.timer(this.getClass(), "request", "latency");
     }
 
-    public static void doTask(Configuration conf) {
-        int totalFiles = ToolConfig.getInstance().getTotalFiles();
+    public void doTask() {
         int totalThreads = ToolConfig.getInstance().getTotalThreads();
-        int offset = ToolConfig.getInstance().getFileOffset();
-        int SingleFileNum = totalFiles / totalThreads;
-        String NNADDR = ToolConfig.getInstance().getHost();
-        String HDFSDIR = ToolConfig.getInstance().getWorkPath();
+        String userName = ToolConfig.getInstance().getUserName();
+        String HostName = ToolConfig.getInstance().getHost();
+        String workPath = ToolConfig.getInstance().getWorkPath();
         ExecutorService ThreadPool = Executors.newFixedThreadPool(totalThreads);
         CountDownLatch Latch = new CountDownLatch(totalThreads);
+        long durationTime = ToolConfig.getInstance().getReadDurationTime();
+
+        Map<Integer, List<String>> nameLists = new HashMap();
+        try {
+            URI uri = new URI(HostName + workPath);
+            FileSystem fs = FileSystem.get(uri, conf, userName);
+            for (int i = 0;i < totalThreads;i++) {
+                String dst = HostName + workPath + "/TestThread-" + i + "/";
+                FileStatus[] fileStatuses = fs.listStatus(new Path(dst));
+                List<String> names = new ArrayList<>();
+                for (FileStatus status : fileStatuses) {
+                    names.add(dst + status.getPath().getName());
+                }
+                nameLists.put(i, names);
+            }
+        } catch (Exception e) {
+            log.warn("list file exception:", e);
+            throw new RuntimeException(e);
+        }
+
+        MetricsSystem.startReport();
+        List<Future> futureList = new ArrayList<>();
+        for (int i = 0; i < totalThreads; i++) {
+            SubTask hlt = new SubTask(userName, nameLists.get(i), conf, Latch);
+            Future future = ThreadPool.submit(hlt);
+            futureList.add(future);
+        }
 
         try {
-            for (int i = 0; i < totalThreads; i++) {
-                int FileStartNum = i * SingleFileNum + offset;
-                int FileEndNum = (i + 1) * SingleFileNum;
-                //hadoop每个文件夹都有文件数量上限，所以此处为每个线程执行的上传新建一个目录
-                String dst = NNADDR + HDFSDIR + "/Thread-" + i + "/";
-                ReadFileTask hlt = new ReadFileTask(dst, FileStartNum, FileEndNum, conf, Latch);
-                ThreadPool.execute(hlt);
-            }
-            Latch.await();
-            ThreadPool.shutdown();
-        } catch (InterruptedException e) {
+//            Latch.await();
+            futureList.get(0).get(durationTime, TimeUnit.SECONDS);
+        } catch (Exception e) {
             log.warn("CheckStatusTask: execute task error,exception:", e);
+        } finally {
+            for (Future future : futureList) {
+                future.cancel(true);
+            }
+            ThreadPool.shutdown();
+            MetricsSystem.stopReport();
         }
     }
 
-    @Override
-    public void run() {
-        System.setProperty("HADOOP_HOME", "/usr/hdp/3.1.0.0-78/hadoop");
-        System.setProperty("HADOOP_USER_NAME", "hdfs");
-        try {
-            FileSystem hdfs = FileSystem.get(conf);
-            String putFilePrefix = ToolConfig.getInstance().getWriteFilePrefix();
-            for (int n = FileStartNum; n < FileEndNum; n++) {
-                String tmpdst = dst + putFilePrefix + n;
-                boolean ret = readFile(tmpdst, hdfs);
-//                boolean ret = readFileToLocal(tmpdst, putFilePrefix + n, hdfs);
-                if (!ret) {
-                    log.warn("read file error,file:" + tmpdst);
-                }
-            }
-        } catch (IOException e) {
-            log.error("read task exception:", e);
-        } finally {
-            latch.countDown();
+    class SubTask implements Runnable {
+        private String user;
+        private List<String> nameList;
+        private Configuration conf;
+        private CountDownLatch latch;
+
+        public SubTask(String user, List<String> nameList, Configuration conf,
+                       CountDownLatch latch) {
+            this.user = user;
+            this.nameList = nameList;
+            this.conf = conf;
+            this.latch = latch;
         }
 
+        @Override
+        public void run() {
+            if (nameList.isEmpty()) {
+                return;
+            }
+            while (true) {
+                FileSystem fs;
+                try {
+                    URI uri = new URI(nameList.get(0));
+                    fs = FileSystem.get(uri, conf, user);
+                } catch (Exception e) {
+                    log.error("read task exception:", e);
+                    return;
+                }
+                for (String path : nameList) {
+                    Path srcPath = new Path(path);
+                    byte[] b = new byte[1048576];
+                    int total = 0;
+                    int length;
+                    FSDataInputStream in = null;
+                    try (Timer.Context context = timer.time()) {
+                        in = fs.open(srcPath);
+                        while ((length = in.read(b)) > 0) {
+                            total = total + length;
+                            iopsMeter.mark(length);
+                        }
+                    } catch (IOException e) {
+                        log.error("read file " + path + " failed! ", e);
+                    } finally {
+                        if (in != null) {
+                            try {
+                                in.close();
+                            } catch (IOException ioException) {
+                                log.warn("read file " + path + " close stream failed. ");
+                            }
+                        }
+                        qpsMeter.mark();
+                    }
+                }
+            }
+        }
     }
 }

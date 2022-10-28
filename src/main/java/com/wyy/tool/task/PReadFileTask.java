@@ -63,7 +63,7 @@ public class PReadFileTask implements Runnable {
         System.setProperty("HADOOP_USER_NAME", "hdfs");
         try {
             FileSystem hdfs = FileSystem.get(conf);
-            String putFilePrefix = ToolConfig.getInstance().getWriteFilePrefix();
+            String putFilePrefix = ToolConfig.getInstance().getCreateFilePrefix();
             for (int n = FileStartNum; n < FileEndNum; n++) {
                 String tmpsrc = dst + putFilePrefix + n;
                 String tmpdst = putFilePrefix + n;
