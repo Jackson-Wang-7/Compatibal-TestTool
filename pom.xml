@@ -98,7 +98,7 @@
     <properties>
         <lombok.version>1.16.20</lombok.version>
         <hadoop.version>3.3.1</hadoop.version>
-        <alluxio.version>enterprise-2.9.0-SNAPSHOT</alluxio.version>
+        <alluxio.version>2.9.0-SNAPSHOT</alluxio.version>
         <metrics.version>4.2.0</metrics.version>
     </properties>
 

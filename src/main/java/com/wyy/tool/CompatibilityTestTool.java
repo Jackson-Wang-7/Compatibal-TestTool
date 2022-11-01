@@ -1,9 +1,9 @@
 package com.wyy.tool;
 
 import com.wyy.tool.common.MetricsSystem;
+import com.wyy.tool.common.OpCode;
 import com.wyy.tool.common.ToolConfig;
 import com.wyy.tool.task.AbstractTask;
-import com.wyy.tool.task.CheckStatusTask;
 import com.wyy.tool.task.CreateTask;
 import com.wyy.tool.task.DeleteTask;
 import com.wyy.tool.task.DiffTask;
@@ -40,53 +40,25 @@ public class CompatibilityTestTool {
         conf.set("fs.defaultFS", NNADDR);
 
         excuteTask(Operation, conf);
+        System.exit(0);
     }
 
-    public static void excuteTask(String Operation, Configuration conf) {
+    public static void excuteTask(String operation, Configuration conf) {
         AbstractTask task;
-        switch (Operation) {
-            case "check":
-                task = new CheckStatusTask(conf);
-                break;
-
-            case "create":
-                task = new CreateTask(conf);
-                break;
-
-            case "delete":
-                task = new DeleteTask(conf);
-                break;
-
-            case "read":
-                task = new ReadFileTask(conf);
-                break;
-
-//            case "readTotal":
-//                ReadTotalTask.doTask(conf);
-//                break;
-//
-//            case "pread":
-//                PReadFileTask.doTask(conf);
-//                break;
-//
-//            case "rest_read":
-//                RestReadFileTask.doTask(conf);
-//                break;
-
-//            case "diff":
-//                DiffTask.doTask(conf);
-//                break;
-//
-            case "loop":
-                task = new LoopTask(conf);
-                break;
-//
-//            case "mix":
-
-            default:
-                System.out.println("not support this op.");
-                log.error("wrong operation");
-                return;
+        if (OpCode.CHECK_STATUS.getOpValue().equals(operation) ||
+            OpCode.READ.getOpValue().equals(operation) ||
+            OpCode.REST_READ.getOpValue().equals(operation)) {
+            task = new ReadFileTask(conf, operation);
+        } else if (OpCode.CREATE.getOpValue().equals(operation)) {
+            task = new CreateTask(conf);
+        } else if (OpCode.DELETE.getOpValue().equals(operation)) {
+            task = new DeleteTask(conf);
+        } else if (OpCode.LOOP.getOpValue().equals(operation)) {
+            task = new LoopTask(conf);
+        } else {
+            System.out.println("not support this op.");
+            log.error("wrong operation");
+            return;
         }
         task.start();
     }

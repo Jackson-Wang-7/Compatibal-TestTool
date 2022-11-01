@@ -1,12 +1,16 @@
 package com.wyy.tool.task;
 
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import com.codahale.metrics.Meter;
 import com.codahale.metrics.MetricAttribute;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.wyy.tool.common.MetricsSystem;
+import com.wyy.tool.common.ToolConfig;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,19 +19,25 @@ public abstract class AbstractTask {
   final static Logger log = LoggerFactory.getLogger(AbstractTask.class);
   Meter qpsMeter;
   Meter iopsMeter;
-
   Timer timer;
   Configuration conf;
+  int totalThreads;
+  ExecutorService ThreadPool;
+  CountDownLatch Latch;
 
   TimeUnit durationUnit = TimeUnit.MILLISECONDS;
   TimeUnit rateUnit = TimeUnit.SECONDS;
+  long startTime;
 
   public AbstractTask(Configuration conf) {
     this.conf = conf;
+    totalThreads = ToolConfig.getInstance().getTotalThreads();
+    ThreadPool = Executors.newFixedThreadPool(totalThreads);
+    Latch = new CountDownLatch(totalThreads);
   }
 
   public void start() {
-    long startTime = System.currentTimeMillis();
+    startTime = System.currentTimeMillis();
     try {
       doTask();
     } finally {
@@ -39,10 +49,10 @@ public abstract class AbstractTask {
 
   public void reportMetrics(long totalTime) {
     if (qpsMeter != null) {
-      log.warn("put qps mean: {} req/s", qpsMeter.getMeanRate());
+      log.warn("op qps mean: {} req/s", qpsMeter.getMeanRate());
     }
     if (iopsMeter != null) {
-      log.warn("put IOps mean:" + iopsMeter.getMeanRate());
+      log.warn("op IOps mean: {}/s", this.convertSize(Double.valueOf(iopsMeter.getMeanRate()).longValue()));
     }
     if (timer != null) {
       Snapshot snapshot = timer.getSnapshot();
@@ -57,6 +67,34 @@ public abstract class AbstractTask {
       log.warn(String.format("99%% <= %2.2f %s", this.convertDuration(snapshot.get99thPercentile()), this.getDurationUnit()));
     }
     log.warn("total time: {}ms", totalTime);
+  }
+
+
+  /**
+   * long to kb/mb/gb
+   * @param size long
+   * @return
+   */
+  public  String convertSize(long size) {
+    if (size < 1024) {
+      return String.valueOf(size) + "B";
+    } else {
+      size = size / 1024;
+    }
+    if (size < 1024) {
+      return String.valueOf(size) + "KB";
+    } else {
+      size = size / 1024;
+    }
+    if (size < 1024) {
+      size = size * 100;
+      return String.valueOf((size / 100)) + "."
+          + String.valueOf((size % 100)) + "MB";
+    } else {
+      size = size * 100 / 1024;
+      return String.valueOf((size / 100)) + "."
+          + String.valueOf((size % 100)) + "GB";
+    }
   }
 
   protected double convertDuration(double duration) {

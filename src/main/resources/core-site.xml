@@ -1,7 +1,7 @@
 <configuration>
     <property>
         <name>fs.s3a.access.key</name>
-        <value>wangyuyang</value>
+        <value>alluxio</value>
     </property>
     <property>
         <name>fs.s3a.secret.key</name>

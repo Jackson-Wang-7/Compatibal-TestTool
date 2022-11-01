@@ -73,6 +73,7 @@ public class CreateTask extends AbstractTask {
             }
         }
 
+        startTime = System.currentTimeMillis();
         MetricsSystem.startReport();
         // submit task
         for (int i = 0; i < totalThreads; i++) {
