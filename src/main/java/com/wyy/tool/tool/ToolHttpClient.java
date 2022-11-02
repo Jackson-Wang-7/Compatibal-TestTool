@@ -1,5 +1,6 @@
 package com.wyy.tool.tool;
 
+import com.codahale.metrics.Meter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -24,8 +25,10 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class ToolHttpClient {
     private static Logger log = LoggerFactory.getLogger(ToolHttpClient.class);
@@ -100,7 +103,7 @@ public class ToolHttpClient {
         return null;
     }
 
-    public static InputStream httpGetStream(String url, Header... heads) {
+    public static boolean httpGetStream(String url, Meter ioMeter, Header... heads) {
         HttpGet httpGet = new HttpGet(url);
         CloseableHttpResponse response = null;
 
@@ -112,11 +115,17 @@ public class ToolHttpClient {
             int code = response.getStatusLine().getStatusCode();
             if (code == HttpStatus.SC_OK) {
                 InputStream inputStream = response.getEntity().getContent();
-                return inputStream;
+                char[] b = new char[1048576];
+                BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream));
+                int length = 0;
+                while ((length = buffer.read(b)) > 0) {
+                    ioMeter.mark(length);
+                }
+                return true;
             } else {
                 String result = EntityUtils.toString(response.getEntity());
                 log.error("request {} return error：{},{}", url, code,result);
-                return null;
+                return false;
             }
         } catch (IOException e) {
             log.error("http request exception，{}",url,e);
@@ -128,7 +137,7 @@ public class ToolHttpClient {
                 log.warn("exception:", e);
             }
         }
-        return null;
+        return false;
     }
 
     public static String httpPost(String uri, String params, Header... heads) {

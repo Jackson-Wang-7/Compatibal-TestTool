@@ -51,7 +51,7 @@ public class Constants {
 
     public static final String VALUE_CREATE_SIZE_PER_FILE_DEFAULT = "1024";
 
-    public static final String KEY_CREATE_FILE_PREFIX = "write_file_prefix";
+    public static final String KEY_CREATE_FILE_PREFIX = "create_file_prefix";
 
     public static final String VALUE_CREATE_FILE_PREFIX_DEFAULT = "test";
 

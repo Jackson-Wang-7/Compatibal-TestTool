@@ -40,9 +40,9 @@ public class ReadFileTask extends AbstractTask {
     public ReadFileTask(Configuration conf, String operation) {
         super(conf);
         this.operation = operation;
-        qpsMeter = MetricsSystem.meter(this.getClass(), "request", "qps");
-        iopsMeter = MetricsSystem.meter(this.getClass(), "request", "iops");
-        timer = MetricsSystem.timer(this.getClass(), "request", "latency");
+        qpsMeter = MetricsSystem.meter(this.getClass(), operation, "qps");
+        iopsMeter = MetricsSystem.meter(this.getClass(), operation, "iops");
+        timer = MetricsSystem.timer(this.getClass(), operation, "latency");
     }
 
     public void doTask() {
@@ -60,7 +60,12 @@ public class ReadFileTask extends AbstractTask {
                 FileStatus[] fileStatuses = fs.listStatus(new Path(dst));
                 List<String> names = new ArrayList<>();
                 for (FileStatus status : fileStatuses) {
-                    names.add(dst + status.getPath().getName());
+                    // rest read need the rest host name instead of default hostname
+                    if (OpCode.REST_READ.getOpValue().equals(operation)) {
+                        names.add(workPath + "/TestThread-" + i + "/" + status.getPath().getName());
+                    } else {
+                        names.add(dst + status.getPath().getName());
+                    }
                 }
                 nameLists.put(i, names);
             }
@@ -127,12 +132,13 @@ public class ReadFileTask extends AbstractTask {
                             return;
                         }
                         Path srcPath = new Path(path);
-                        byte[] b = new byte[1048576];
+                        char[] b = new char[1048576];
                         int length;
                         FSDataInputStream in = null;
                         try (Timer.Context context = timer.time()) {
                             in = fs.open(srcPath);
-                            while ((length = in.read(b)) > 0) {
+                            BufferedReader buffer = new BufferedReader(new InputStreamReader(in));
+                            while ((length = buffer.read(b)) > 0) {
                                 iopsMeter.mark(length);
                             }
                         } catch (IOException e) {
@@ -188,6 +194,8 @@ public class ReadFileTask extends AbstractTask {
                         }
                         try (Timer.Context context = timer.time()) {
                             ToolOperator.checkFile(path, fs);
+                        } finally {
+                            qpsMeter.mark();
                         }
                     }
                 }
@@ -219,29 +227,16 @@ public class ReadFileTask extends AbstractTask {
             try {
                 while (true) {
                     for (String path : nameList) {
-//                        String getUrl = restHost + path;
-                        String Authorization = String.format("AWS %s:3uRmVm7lWfvclsqfpPJN2Ftigi4=", user);
-                        Header header = new BasicHeader("Authorization", Authorization);
                         if (end.get()) {
                             return;
                         }
-
-                        InputStream in = null;
                         try (Timer.Context context = timer.time()) {
-                            in = ToolHttpClient.httpGetStream(path, header);
-                            if (in == null) {
-                                continue;
-                            }
-                            char[] b = new char[1048576];
-                            BufferedReader buffer = new BufferedReader(new InputStreamReader(in));
-                            int length = 0;
-                            while ((length = buffer.read(b)) > 0) {
-                                qpsMeter.mark(length);
-                            }
+                            String restUrl = restHost + path;
+                            String Authorization = String.format("AWS4-HMAC-SHA256 Credential=%s/3uRmVm7lWfvclsqfpPJN2Ftigi4=", user);
+                            Header header = new BasicHeader("Authorization", Authorization);
+                            ToolHttpClient.httpGetStream(restUrl, iopsMeter, header);
                         } finally {
-                            if (in != null) {
-                                in.close();
-                            }
+                            qpsMeter.mark();
                         }
                     }
                 }
