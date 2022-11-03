@@ -115,8 +115,10 @@ public class ToolHttpClient {
             int code = response.getStatusLine().getStatusCode();
             if (code == HttpStatus.SC_OK) {
                 InputStream inputStream = response.getEntity().getContent();
-                char[] b = new char[1048576];
-                BufferedReader buffer = new BufferedReader(new InputStreamReader(inputStream));
+                int bufferSize = 1048576;
+                char[] b = new char[bufferSize];
+                BufferedReader buffer =
+                    new BufferedReader(new InputStreamReader(inputStream), bufferSize * 2);
                 int length = 0;
                 while ((length = buffer.read(b)) > 0) {
                     ioMeter.mark(length);

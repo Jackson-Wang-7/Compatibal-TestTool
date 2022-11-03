@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 
 import static com.wyy.tool.common.ToolOperator.*;
 
+@Deprecated
 public class PReadFileTask implements Runnable {
 
     final static Logger log = LoggerFactory.getLogger(PReadFileTask.class);

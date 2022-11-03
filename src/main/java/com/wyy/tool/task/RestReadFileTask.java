@@ -15,6 +15,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Deprecated
 public class RestReadFileTask implements Runnable {
 
     final static Logger log = LoggerFactory.getLogger(RestReadFileTask.class);

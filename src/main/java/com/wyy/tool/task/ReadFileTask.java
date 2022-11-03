@@ -132,12 +132,13 @@ public class ReadFileTask extends AbstractTask {
                             return;
                         }
                         Path srcPath = new Path(path);
-                        char[] b = new char[1048576];
+                        int bufferSize = 1048576;
+                        char[] b = new char[bufferSize];
                         int length;
                         FSDataInputStream in = null;
                         try (Timer.Context context = timer.time()) {
                             in = fs.open(srcPath);
-                            BufferedReader buffer = new BufferedReader(new InputStreamReader(in));
+                            BufferedReader buffer = new BufferedReader(new InputStreamReader(in), bufferSize * 2);
                             while ((length = buffer.read(b)) > 0) {
                                 iopsMeter.mark(length);
                             }
