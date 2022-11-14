@@ -21,8 +21,11 @@ public class ToolConfig {
     private long createSizePerFile;
     private String createFilePrefix;
     private long readDurationTime;
+    private int readBufferSize;
     private String deleteFilePrefix;
-    private String mixOps;
+    private int mixReadPercentage;
+    private int mixCreatePercentage;
+    private String loopOps;
     private int loopCount;
 
     public static ToolConfig getInstance() {
@@ -48,8 +51,11 @@ public class ToolConfig {
         createFilePrefix = props.getProperty(Constants.KEY_CREATE_FILE_PREFIX, Constants.VALUE_CREATE_FILE_PREFIX_DEFAULT);
 
         readDurationTime = Long.valueOf(props.getProperty(Constants.KEY_READ_DURATION_TIME, Constants.VALUE_READ_DURATION_TIME_DEFAULT));
+        readBufferSize = Integer.valueOf(props.getProperty(Constants.KEY_READ_BUFFER_SIZE, Constants.VALUE_READ_BUFFER_SIZE_DEFAULT));
         deleteFilePrefix = props.getProperty(Constants.KEY_DELETE_FILE_PREFIX, Constants.VALUE_DELETE_FILE_PREFIX_DEFAULT);
-        mixOps = props.getProperty(Constants.KEY_OPS, Constants.VALUE_OPS_DEFAULT);
+        mixReadPercentage = Integer.valueOf(props.getProperty(Constants.KEY_MIX_READ_PERCENTAGE, Constants.VALUE_MIX_READ_PERCENTAGE));
+        mixCreatePercentage = Integer.valueOf(props.getProperty(Constants.KEY_MIX_CREATE_PERCENTAGE, Constants.VALUE_MIX_CREATE_PERCENTAGE));
+        loopOps = props.getProperty(Constants.KEY_OPS, Constants.VALUE_OPS_DEFAULT);
         loopCount = Integer.valueOf(props.getProperty(Constants.KEY_LOOP_COUNT, Constants.VALUE_LOOP_COUNT_DEFAULT));
     }
 
@@ -109,12 +115,24 @@ public class ToolConfig {
         return readDurationTime;
     }
 
+    public int getReadBufferSize() {
+        return readBufferSize;
+    }
+
     public String getDeleteFilePrefix() {
         return deleteFilePrefix;
     }
 
-    public String getMixOps() {
-        return mixOps;
+    public int getMixReadPercentage() {
+        return mixReadPercentage;
+    }
+
+    public int getMixCreatePercentage() {
+        return mixCreatePercentage;
+    }
+
+    public String getLoopOps() {
+        return loopOps;
     }
 
     public int getLoopCount() {

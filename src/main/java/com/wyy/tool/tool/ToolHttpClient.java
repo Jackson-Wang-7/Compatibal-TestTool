@@ -1,6 +1,7 @@
 package com.wyy.tool.tool;
 
 import com.codahale.metrics.Meter;
+import com.wyy.tool.common.ToolConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -25,6 +26,7 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -63,7 +65,7 @@ public class ToolHttpClient {
     }
 
     public static CloseableHttpClient getConnection() {
-        RequestConfig config = RequestConfig.custom().setConnectTimeout(5000).setConnectionRequestTimeout(5000).setSocketTimeout(5000).build();
+        RequestConfig config = RequestConfig.custom().setConnectTimeout(5000).setConnectionRequestTimeout(5000).setSocketTimeout(300000).build();
         CloseableHttpClient httpClient = HttpClients.custom()
                 // 设置连接池管理
                 .setConnectionManager(poolConnManager)
@@ -115,10 +117,9 @@ public class ToolHttpClient {
             int code = response.getStatusLine().getStatusCode();
             if (code == HttpStatus.SC_OK) {
                 InputStream inputStream = response.getEntity().getContent();
-                int bufferSize = 1048576;
-                char[] b = new char[bufferSize];
-                BufferedReader buffer =
-                    new BufferedReader(new InputStreamReader(inputStream), bufferSize * 2);
+                int bufferSize = ToolConfig.getInstance().getReadBufferSize();
+                byte[] b = new byte[bufferSize];
+                BufferedInputStream buffer = new BufferedInputStream(inputStream, bufferSize);
                 int length = 0;
                 while ((length = buffer.read(b)) > 0) {
                     ioMeter.mark(length);

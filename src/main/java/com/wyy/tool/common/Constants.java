@@ -59,9 +59,21 @@ public class Constants {
 
     public static final String VALUE_READ_DURATION_TIME_DEFAULT = "60";
 
+    public static final String KEY_READ_BUFFER_SIZE = "read_buffer_size";
+
+    public static final String VALUE_READ_BUFFER_SIZE_DEFAULT = "1048576";
+
     public static final String KEY_DELETE_FILE_PREFIX = "delete_file_prefix";
 
     public static final String VALUE_DELETE_FILE_PREFIX_DEFAULT = "/xxx/xxx/xxx";
+
+    public static final String KEY_MIX_READ_PERCENTAGE = "mix_read_percentage";
+
+    public static final String VALUE_MIX_READ_PERCENTAGE = "100";
+
+    public static final String KEY_MIX_CREATE_PERCENTAGE = "mix_create_percentage";
+
+    public static final String VALUE_MIX_CREATE_PERCENTAGE = "0";
 
     public static final String KEY_OPS = "ops";
 

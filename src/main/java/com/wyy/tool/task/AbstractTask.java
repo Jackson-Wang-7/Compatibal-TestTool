@@ -6,10 +6,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import com.codahale.metrics.Meter;
-import com.codahale.metrics.MetricAttribute;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
-import com.wyy.tool.common.MetricsSystem;
 import com.wyy.tool.common.ToolConfig;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -22,8 +20,8 @@ public abstract class AbstractTask {
   Timer timer;
   Configuration conf;
   int totalThreads;
-  ExecutorService ThreadPool;
-  CountDownLatch Latch;
+  ExecutorService threadPool;
+  CountDownLatch latch;
 
   TimeUnit durationUnit = TimeUnit.MILLISECONDS;
   TimeUnit rateUnit = TimeUnit.SECONDS;
@@ -32,8 +30,8 @@ public abstract class AbstractTask {
   public AbstractTask(Configuration conf) {
     this.conf = conf;
     totalThreads = ToolConfig.getInstance().getTotalThreads();
-    ThreadPool = Executors.newFixedThreadPool(totalThreads);
-    Latch = new CountDownLatch(totalThreads);
+    threadPool = Executors.newFixedThreadPool(totalThreads);
+    latch = new CountDownLatch(totalThreads);
   }
 
   public void start() {

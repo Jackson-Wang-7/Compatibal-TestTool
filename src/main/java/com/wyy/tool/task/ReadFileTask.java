@@ -16,18 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.wyy.tool.common.ToolConfig;
 
-import java.io.BufferedReader;
+import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -79,26 +75,26 @@ public class ReadFileTask extends AbstractTask {
         for (int i = 0; i < totalThreads; i++) {
             Runnable task;
             if (OpCode.READ.getOpValue().equals(operation)) {
-                task = new ReadSubTask(userName, nameLists.get(i), conf, Latch);
+                task = new ReadSubTask(userName, nameLists.get(i), conf, latch);
             } else if (OpCode.CHECK_STATUS.getOpValue().equals(operation)) {
-                task = new CheckSubTask(userName, nameLists.get(i), conf, Latch);
+                task = new CheckSubTask(userName, nameLists.get(i), conf, latch);
             } else if (OpCode.REST_READ.getOpValue().equals(operation)) {
-                task = new RestReadSubTask(userName, nameLists.get(i), Latch);
+                task = new RestReadSubTask(userName, nameLists.get(i), latch);
             } else {
                 return;
             }
-            ThreadPool.execute(task);
+            threadPool.execute(task);
         }
 
         try {
-            Latch.await(durationTime, TimeUnit.SECONDS);
+            latch.await(durationTime, TimeUnit.SECONDS);
             end.set(true);
             log.warn("all tasks should meet the end.");
-            Latch.await();
+            latch.await();
         } catch (Exception e) {
             log.warn("CheckStatusTask: execute task error,exception:", e);
         } finally {
-            ThreadPool.shutdownNow();
+            threadPool.shutdownNow();
             MetricsSystem.stopReport();
         }
     }
@@ -122,9 +118,9 @@ public class ReadFileTask extends AbstractTask {
             if (nameList.isEmpty()) {
                 return;
             }
+            FileSystem fs = null;
             try {
                 while (true) {
-                    FileSystem fs;
                     URI uri = new URI(nameList.get(0));
                     fs = FileSystem.get(uri, conf, user);
                     for (String path : nameList) {
@@ -132,13 +128,13 @@ public class ReadFileTask extends AbstractTask {
                             return;
                         }
                         Path srcPath = new Path(path);
-                        int bufferSize = 1048576;
-                        char[] b = new char[bufferSize];
+                        int bufferSize = ToolConfig.getInstance().getReadBufferSize();
+                        byte[] b = new byte[bufferSize];
                         int length;
                         FSDataInputStream in = null;
                         try (Timer.Context context = timer.time()) {
                             in = fs.open(srcPath);
-                            BufferedReader buffer = new BufferedReader(new InputStreamReader(in), bufferSize * 2);
+                            BufferedInputStream buffer = new BufferedInputStream(in, bufferSize);
                             while ((length = buffer.read(b)) > 0) {
                                 iopsMeter.mark(length);
                             }
@@ -160,6 +156,13 @@ public class ReadFileTask extends AbstractTask {
                 log.error("read task exception:", e);
                 return;
             } finally {
+                if (fs != null) {
+                    try {
+                        fs.close();
+                    } catch (IOException e) {
+                        log.warn("fs close error. exception: ", e);
+                    }
+                }
                 latch.countDown();
             }
         }
@@ -184,9 +187,9 @@ public class ReadFileTask extends AbstractTask {
             if (nameList.isEmpty()) {
                 return;
             }
+            FileSystem fs = null;
             try {
                 while (true) {
-                    FileSystem fs;
                     URI uri = new URI(nameList.get(0));
                     fs = FileSystem.get(uri, conf, user);
                     for (String path : nameList) {
@@ -203,6 +206,13 @@ public class ReadFileTask extends AbstractTask {
             } catch (Exception e) {
                 log.error("read task exception:", e);
             } finally {
+                if (fs != null) {
+                    try {
+                        fs.close();
+                    } catch (IOException e) {
+                        log.warn("fs close error. exception: ", e);
+                    }
+                }
                 latch.countDown();
             }
         }

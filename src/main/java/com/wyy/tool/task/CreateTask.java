@@ -17,8 +17,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import static com.wyy.tool.common.ToolOperator.*;
 
@@ -44,56 +42,61 @@ public class CreateTask extends AbstractTask {
         //prepare test file
         long fileSize = ToolConfig.getInstance().getCreateSizePerFile();
         String src = ToolConfig.getInstance().getCreateFilePath();
-        if (fileSize != 0) {
+        if (fileSize >= 0) {
             prepareTestFile(fileSize, src);
         }
 
-        int SingleFileNum = totalFiles / totalThreads;
-        ExecutorService ThreadPool = Executors.newFixedThreadPool(totalThreads);
-        CountDownLatch Latch = new CountDownLatch(totalThreads);
-        Map<Integer, List<String>> nameLists = new HashMap();
+        int fileNumPerThread = totalFiles / totalThreads;
         //prepare name list
-        if ("random".equals(nameType)) {
-            for (int i = 0; i < totalThreads; i++) {
-                List<String> names = new ArrayList<>();
-                for (int j = 0; j < SingleFileNum; j++) {
-                    names.add(RandomStringUtils.randomAlphanumeric(10));
-                }
-                nameLists.put(i, names);
-            }
-        } else {
-            for (int i = 0; i < totalThreads; i++) {
-                int startNum = i * SingleFileNum;
-                int endNum = (i + 1) * SingleFileNum;
-                List<String> names = new ArrayList<>();
-                for (int j = startNum; j < endNum; j++) {
-                    names.add(filePrefix + i);
-                }
-                nameLists.put(i, names);
-            }
-        }
+        Map<Integer, List<String>> nameLists =
+            prepareNamelists(totalThreads, nameType, filePrefix, fileNumPerThread);
 
         startTime = System.currentTimeMillis();
         MetricsSystem.startReport();
         // submit task
         for (int i = 0; i < totalThreads; i++) {
             String dst = HostName + workPath + "/TestThread-" + i + "/";
-            SubTask hlt = new SubTask(src, dst, userName, nameLists.get(i), fileSize, conf, Latch);
-            ThreadPool.execute(hlt);
+            SubTask hlt = new SubTask(src, dst, userName, nameLists.get(i), fileSize, conf, latch);
+            threadPool.execute(hlt);
         }
 
         //wait result
         try {
-            Latch.await();
+            latch.await();
         } catch (InterruptedException e) {
             log.warn("CreateTask: execute task error,exception:", e);
         } finally {
-            ThreadPool.shutdown();
+            threadPool.shutdown();
             MetricsSystem.stopReport();
         }
     }
 
-    private void prepareTestFile(long fileSize, String src) {
+    public static Map<Integer, List<String>> prepareNamelists(int totalThreads, String nameType,
+                                                         String filePrefix, int fileNumPerThread) {
+        Map<Integer, List<String>> nameLists = new HashMap();
+        if ("random".equals(nameType)) {
+            for (int i = 0; i < totalThreads; i++) {
+                List<String> names = new ArrayList<>();
+                for (int j = 0; j < fileNumPerThread; j++) {
+                    names.add(filePrefix + RandomStringUtils.randomAlphanumeric(10));
+                }
+                nameLists.put(i, names);
+            }
+        } else {
+            for (int i = 0; i < totalThreads; i++) {
+                int startNum = i * fileNumPerThread;
+                int endNum = (i + 1) * fileNumPerThread;
+                List<String> names = new ArrayList<>();
+                for (int j = startNum; j < endNum; j++) {
+                    names.add(filePrefix + "-" + j);
+                }
+                nameLists.put(i, names);
+            }
+        }
+        return nameLists;
+    }
+
+    public static void prepareTestFile(long fileSize, String src) {
         try {
             File file = new File(src);
             FileOutputStream fileOut = new FileOutputStream(file, false);
@@ -113,7 +116,7 @@ public class CreateTask extends AbstractTask {
     }
 
 
-    class SubTask implements Runnable {
+    public class SubTask implements Runnable {
         private String src;
         private String dst;
         private String user;
@@ -137,9 +140,8 @@ public class CreateTask extends AbstractTask {
             try {
                 URI uri = new URI(dst);
                 FileSystem fs = FileSystem.get(uri, conf, user);
-                String putFilePrefix = ToolConfig.getInstance().getCreateFilePrefix();
                 for (String name : nameList) {
-                    String tmpdst = dst + putFilePrefix + name;
+                    String tmpdst = dst + name;
                     boolean ret;
                     try(Timer.Context context = timer.time()) {
                         ret = putToFS(src, tmpdst, fs);

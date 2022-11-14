@@ -14,7 +14,7 @@ public class LoopTask extends AbstractTask {
     }
 
     public void doTask() {
-        String ops = ToolConfig.getInstance().getMixOps();
+        String ops = ToolConfig.getInstance().getLoopOps();
         int loopCount = ToolConfig.getInstance().getLoopCount();
         int count = 1;
         while (count <= loopCount) {

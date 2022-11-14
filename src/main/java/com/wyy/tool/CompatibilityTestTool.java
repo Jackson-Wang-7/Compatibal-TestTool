@@ -8,6 +8,7 @@ import com.wyy.tool.task.CreateTask;
 import com.wyy.tool.task.DeleteTask;
 import com.wyy.tool.task.DiffTask;
 import com.wyy.tool.task.LoopTask;
+import com.wyy.tool.task.MixTask;
 import com.wyy.tool.task.PReadFileTask;
 import com.wyy.tool.task.ReadFileTask;
 import com.wyy.tool.task.ReadTotalTask;
@@ -55,6 +56,8 @@ public class CompatibilityTestTool {
             task = new DeleteTask(conf);
         } else if (OpCode.LOOP.getOpValue().equals(operation)) {
             task = new LoopTask(conf);
+        } else if (OpCode.MIX.getOpValue().equals(operation)) {
+            task = new MixTask(conf);
         } else {
             System.out.println("not support this op.");
             log.error("wrong operation");
