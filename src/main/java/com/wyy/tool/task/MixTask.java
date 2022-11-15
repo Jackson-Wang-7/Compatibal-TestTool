@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import com.codahale.metrics.Meter;
+import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.wyy.tool.common.MetricsSystem;
 import com.wyy.tool.common.ToolConfig;
@@ -23,12 +25,19 @@ import org.slf4j.LoggerFactory;
 public class MixTask extends AbstractTask {
   final static Logger log = LoggerFactory.getLogger(ReadFileTask.class);
   AtomicBoolean end = new AtomicBoolean(false);
+  Meter readIopsMeter;
+  Timer readTimer;
+  Meter createIopsMeter;
+  Timer createTimer;
 
   public MixTask(Configuration conf) {
     super(conf);
-    qpsMeter = MetricsSystem.meter(this.getClass(), "mix", "qps");
-    iopsMeter = MetricsSystem.meter(this.getClass(), "mix", "iops");
-    timer = MetricsSystem.timer(this.getClass(), "mix", "latency");
+    qpsMeter = MetricsSystem.meter(this.getClass(), "total", "qps");
+    iopsMeter = MetricsSystem.meter(this.getClass(), "total", "iops");
+    readIopsMeter = MetricsSystem.meter(this.getClass(), "read", "iops");
+    readTimer = MetricsSystem.timer(this.getClass(), "read", "latency");
+    createIopsMeter = MetricsSystem.meter(this.getClass(), "create", "iops");
+    createTimer = MetricsSystem.timer(this.getClass(), "create", "latency");
   }
 
   @Override
@@ -104,6 +113,54 @@ public class MixTask extends AbstractTask {
     }
   }
 
+  @Override
+  public void reportMetrics(long totalTime) {
+    super.reportMetrics(totalTime);
+    log.warn("read op IOps mean: {}/s",
+        this.convertSize(Double.valueOf(readIopsMeter.getMeanRate()).longValue()));
+    Snapshot readsnapshot = readTimer.getSnapshot();
+    log.warn("op = read, count = {}", readTimer.getCount());
+    log.warn(String.format("mean rate = %2.2f calls/%s", this.convertRate(readTimer.getMeanRate()),
+        this.getRateUnit()));
+    log.warn(String.format("min = %2.2f %s", this.convertDuration((double) readsnapshot.getMin()),
+        this.getDurationUnit()));
+    log.warn(String.format("max = %2.2f %s", this.convertDuration((double) readsnapshot.getMax()),
+        this.getDurationUnit()));
+    log.warn(String.format("mean = %2.2f %s", this.convertDuration(readsnapshot.getMean()),
+        this.getDurationUnit()));
+    log.warn(String.format("median = %2.2f %s", this.convertDuration(readsnapshot.getMedian()),
+        this.getDurationUnit()));
+    log.warn(
+        String.format("95%% <= %2.2f %s", this.convertDuration(readsnapshot.get95thPercentile()),
+            this.getDurationUnit()));
+    log.warn(
+        String.format("99%% <= %2.2f %s", this.convertDuration(readsnapshot.get99thPercentile()),
+            this.getDurationUnit()));
+
+    log.warn("create op IOps mean: {}/s",
+        this.convertSize(Double.valueOf(createIopsMeter.getMeanRate()).longValue()));
+    Snapshot createsnapshot = createTimer.getSnapshot();
+    log.warn("op = create, count = {}", createTimer.getCount());
+    log.warn(
+        String.format("mean rate = %2.2f calls/%s", this.convertRate(createTimer.getMeanRate()),
+            this.getRateUnit()));
+    log.warn(String.format("min = %2.2f %s", this.convertDuration((double) createsnapshot.getMin()),
+        this.getDurationUnit()));
+    log.warn(String.format("max = %2.2f %s", this.convertDuration((double) createsnapshot.getMax()),
+        this.getDurationUnit()));
+    log.warn(String.format("mean = %2.2f %s", this.convertDuration(createsnapshot.getMean()),
+        this.getDurationUnit()));
+    log.warn(String.format("median = %2.2f %s", this.convertDuration(createsnapshot.getMedian()),
+        this.getDurationUnit()));
+    log.warn(
+        String.format("95%% <= %2.2f %s", this.convertDuration(createsnapshot.get95thPercentile()),
+            this.getDurationUnit()));
+    log.warn(
+        String.format("99%% <= %2.2f %s", this.convertDuration(createsnapshot.get99thPercentile()),
+            this.getDurationUnit()));
+    log.warn("total time: {}ms", totalTime);
+  }
+
   private boolean prepareReadFiles(int readThreadCount, long fileSize, String src, Map<Integer, List<String>> readNameLists) {
     String HostName = ToolConfig.getInstance().getHost();
     String workPath = ToolConfig.getInstance().getWorkPath();
@@ -159,14 +216,15 @@ public class MixTask extends AbstractTask {
           }
           boolean ret;
           String tmpdst = dst + filePrefix + RandomStringUtils.randomAlphanumeric(10);
-          try (Timer.Context context = timer.time()) {
+          try (Timer.Context context = createTimer.time()) {
             ret = putToFS(src, tmpdst, fs);
           }
           if (!ret) {
             log.warn("write : put file to hdfs failed, file:" + tmpdst);
           } else {
-            qpsMeter.mark();
+            createIopsMeter.mark(fileSize);
             iopsMeter.mark(fileSize);
+            qpsMeter.mark();
           }
         }
       } catch (Exception e) {
@@ -213,15 +271,17 @@ public class MixTask extends AbstractTask {
             byte[] b = new byte[bufferSize];
             int length;
             FSDataInputStream in = null;
-            try (Timer.Context context = timer.time()) {
+            try (Timer.Context context = readTimer.time()) {
               in = fs.open(srcPath);
               BufferedInputStream buffer = new BufferedInputStream(in, bufferSize);
               while ((length = buffer.read(b)) > 0) {
+                readIopsMeter.mark(length);
                 iopsMeter.mark(length);
               }
             } catch (IOException e) {
               log.error("read file " + path + " failed! ", e);
             } finally {
+              qpsMeter.mark();
               if (in != null) {
                 try {
                   in.close();
@@ -229,7 +289,6 @@ public class MixTask extends AbstractTask {
                   log.warn("read file " + path + " close stream failed. ");
                 }
               }
-              qpsMeter.mark();
             }
           }
         }
