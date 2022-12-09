@@ -23,6 +23,10 @@ public class Constants {
 
     public static final String VALUE_WORK_PATH_DEFAULT = "/";
 
+    public static final String KEY_BUCKET_NAME = "bucket_name";
+
+    public static final String VALUE_BUCKET_NAME_DEFAULT = "testbucket";
+
     public static final String KEY_CONFIG_PATH = "config";
 
     public static final String VALUE_CONFIG_DEFAULT = ".";

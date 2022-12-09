@@ -1,7 +1,13 @@
 package com.wyy.tool.task;
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.codahale.metrics.Timer;
 import com.wyy.tool.common.MetricsSystem;
+import com.wyy.tool.common.OpCode;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -23,8 +29,10 @@ import static com.wyy.tool.common.ToolOperator.*;
 public class CreateTask extends AbstractTask {
     final static Logger log = LoggerFactory.getLogger(CreateTask.class);
 
-    public CreateTask(Configuration conf) {
+    String operation;
+    public CreateTask(Configuration conf, String operation) {
         super(conf);
+        this.operation = operation;
         qpsMeter = MetricsSystem.meter(this.getClass(), "request", "qps");
         iopsMeter = MetricsSystem.meter(this.getClass(), "request", "iops");
         timer = MetricsSystem.timer(this.getClass(), "request", "latency");
@@ -37,6 +45,7 @@ public class CreateTask extends AbstractTask {
         String userName = ToolConfig.getInstance().getUserName();
         String HostName = ToolConfig.getInstance().getHost();
         String workPath = ToolConfig.getInstance().getWorkPath();
+        String bucket = ToolConfig.getInstance().getBucketName();
         String filePrefix = ToolConfig.getInstance().getCreateFilePrefix();
 
         //prepare test file
@@ -55,9 +64,17 @@ public class CreateTask extends AbstractTask {
         MetricsSystem.startReport();
         // submit task
         for (int i = 0; i < totalThreads; i++) {
-            String dst = HostName + workPath + "/TestThread-" + i + "/";
-            SubTask hlt = new SubTask(src, dst, userName, nameLists.get(i), fileSize, conf, latch);
-            threadPool.execute(hlt);
+            Runnable task;
+            if (OpCode.CREATE.getOpValue().equals(operation)) {
+                String dst = HostName + workPath + "/TestThread-" + i + "/";
+                task = new CreateSubTask(src, dst, userName, nameLists.get(i), fileSize, conf, latch);
+            } else if (OpCode.REST_CREATE.getOpValue().equals(operation)) {
+                String dst = workPath + "/TestThread-" + i + "/";
+                task = new RestCreateSubTask(src, bucket, dst, userName, nameLists.get(i), fileSize, conf, latch);
+            } else {
+                return;
+            }
+            threadPool.execute(task);
         }
 
         //wait result
@@ -115,8 +132,7 @@ public class CreateTask extends AbstractTask {
         }
     }
 
-
-    public class SubTask implements Runnable {
+    public class CreateSubTask implements Runnable {
         private String src;
         private String dst;
         private String user;
@@ -125,8 +141,8 @@ public class CreateTask extends AbstractTask {
         private CountDownLatch Latch;
         private long fileSize;
 
-        public SubTask(String src, String dst, String user, List<String> nameList, long fileSize, Configuration conf,
-                       CountDownLatch latch) {
+        public CreateSubTask(String src, String dst, String user, List<String> nameList, long fileSize, Configuration conf,
+                             CountDownLatch latch) {
             this.src = src;
             this.dst = dst;
             this.user = user;
@@ -152,6 +168,57 @@ public class CreateTask extends AbstractTask {
                         iopsMeter.mark(fileSize);
                     }
                     qpsMeter.mark();
+                }
+            } catch (Exception e) {
+                log.error("write task exception:", e);
+            } finally {
+                Latch.countDown();
+            }
+        }
+    }
+
+    public class RestCreateSubTask implements Runnable {
+        private String src;
+        private String bucket;
+        private String dst;
+        private String user;
+        private List<String> nameList;
+        private Configuration conf;
+        private CountDownLatch Latch;
+        private long fileSize;
+
+        public RestCreateSubTask(String src, String bucket, String dst, String user, List<String> nameList, long fileSize, Configuration conf,
+                             CountDownLatch latch) {
+            this.src = src;
+            this.bucket = bucket;
+            this.dst = dst;
+            this.user = user;
+            this.nameList = nameList;
+            this.fileSize = fileSize;
+            this.conf = conf;
+            Latch = latch;
+        }
+        @Override
+        public void run() {
+            try {
+                String HostName = ToolConfig.getInstance().getRestHost();
+                BasicAWSCredentials awsCreds = new BasicAWSCredentials(user, "secret_key_id");
+                AmazonS3 s3 =
+                    AmazonS3ClientBuilder.standard()
+                        .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
+                        .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
+                            HostName, "xx"))
+                        .enablePathStyleAccess()
+                        .build();
+                for (String name : nameList) {
+                    try(Timer.Context context = timer.time()) {
+                        String objectKey = dst + name;
+                        s3.putObject(bucket, objectKey, new File(src));
+                        iopsMeter.mark(fileSize);
+                        qpsMeter.mark();
+                    } catch (Exception e) {
+                        log.warn("write : put file to hdfs failed, file:" + name, e);
+                    }
                 }
             } catch (Exception e) {
                 log.error("write task exception:", e);

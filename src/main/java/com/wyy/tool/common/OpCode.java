@@ -2,6 +2,7 @@ package com.wyy.tool.common;
 
 public enum OpCode {
   CREATE("create"),
+  REST_CREATE("rest-create"),
   READ("read"),
   CHECK_STATUS("check"),
   REST_READ("rest-read"),

@@ -13,6 +13,7 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.wyy.tool.common.MetricsSystem;
+import com.wyy.tool.common.OpCode;
 import com.wyy.tool.common.ToolConfig;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -168,9 +169,9 @@ public class MixTask extends AbstractTask {
     CountDownLatch countDownLatch = new CountDownLatch(readThreadCount);
     for (int i = 0; i < readThreadCount; i++) {
       String dst = HostName + workPath + "/read-TestThread-" + i + "/";
-      CreateTask task = new CreateTask(conf);
-      CreateTask.SubTask hlt =
-          task.new SubTask(src, dst, userName, readNameLists.get(i), fileSize, conf,
+      CreateTask task = new CreateTask(conf, OpCode.CREATE.getOpValue());
+      CreateTask.CreateSubTask hlt =
+          task.new CreateSubTask(src, dst, userName, readNameLists.get(i), fileSize, conf,
               countDownLatch);
       threadPool.execute(hlt);
     }

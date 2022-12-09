@@ -12,6 +12,7 @@ public class ToolConfig {
     private String opName;
     private String userName;
     private String workPath;
+    private String bucketName;
     private String configPath;
     private int totalThreads;
     private int totalFiles;
@@ -41,6 +42,7 @@ public class ToolConfig {
         opName = props.getProperty(Constants.KEY_OPERATION_NAME, Constants.VALUE_OPERATION_NAME_DEFAULT);
         userName = props.getProperty(Constants.KEY_USER_NAME, Constants.VALUE_USER_NAME_DEFAULT);
         workPath = props.getProperty(Constants.KEY_WORK_PATH, Constants.VALUE_WORK_PATH_DEFAULT);
+        bucketName = props.getProperty(Constants.KEY_BUCKET_NAME, Constants.VALUE_BUCKET_NAME_DEFAULT);
         configPath = props.getProperty(Constants.KEY_CONFIG_PATH, Constants.VALUE_CONFIG_DEFAULT);
         totalThreads = Integer.parseInt(props.getProperty(Constants.KEY_TOTAL_THREADS, Constants.VALUE_TOTAL_THREADS_DEFAULT));
 
@@ -137,5 +139,9 @@ public class ToolConfig {
 
     public int getLoopCount() {
         return loopCount;
+    }
+
+    public String getBucketName() {
+        return bucketName;
     }
 }
