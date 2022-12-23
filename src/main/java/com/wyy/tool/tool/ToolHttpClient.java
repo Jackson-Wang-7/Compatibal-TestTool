@@ -4,14 +4,20 @@ import com.codahale.metrics.Meter;
 import com.wyy.tool.common.ToolConfig;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -21,6 +27,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicHeaderElementIterator;
+import org.apache.http.protocol.HTTP;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -65,13 +74,39 @@ public class ToolHttpClient {
     }
 
     public static CloseableHttpClient getConnection() {
-        RequestConfig config = RequestConfig.custom().setConnectTimeout(5000).setConnectionRequestTimeout(5000).setSocketTimeout(300000).build();
+        ConnectionKeepAliveStrategy keepAliveStrategy = new ConnectionKeepAliveStrategy() {
+            public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
+                // Honor 'keep-alive' header
+                HeaderElementIterator it = new BasicHeaderElementIterator(
+                    response.headerIterator(HTTP.CONN_KEEP_ALIVE));
+                while (it.hasNext()) {
+                    HeaderElement he = it.nextElement();
+                    String param = he.getName();
+                    String value = he.getValue();
+                    if (value != null && param.equalsIgnoreCase("timeout")) {
+                        try {
+                            return Long.parseLong(value) * 1000;
+                        } catch(NumberFormatException ignore) {
+                        }
+                    }
+                }
+                // otherwise keep alive for 30 seconds
+                return 120 * 1000;
+            }
+        };
+        RequestConfig config = RequestConfig.custom()
+                .setConnectTimeout(5000)
+                .setConnectionRequestTimeout(5000)
+                .setSocketTimeout(300000)
+                .build();
         CloseableHttpClient httpClient = HttpClients.custom()
                 // 设置连接池管理
                 .setConnectionManager(poolConnManager)
+                .setKeepAliveStrategy(keepAliveStrategy)
                 .setDefaultRequestConfig(config)
                 // 设置重试次数
-                .setRetryHandler(new DefaultHttpRequestRetryHandler(2, false)).build();
+                .setRetryHandler(new DefaultHttpRequestRetryHandler(3, false))
+                .build();
         return httpClient;
     }
 
