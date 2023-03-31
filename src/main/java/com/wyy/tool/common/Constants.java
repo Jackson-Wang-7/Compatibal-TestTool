@@ -86,4 +86,12 @@ public class Constants {
     public static final String KEY_LOOP_COUNT = "loopCount";
 
     public static final String VALUE_LOOP_COUNT_DEFAULT = "1";
+
+    public static final String KEY_ACCESS_KEY = "access_key";
+
+    public static final String VALUE_ACCESS_KEY_DEFAULT = "alluxio";
+
+    public static final String KEY_SECRET_KEY = "secret_key";
+
+    public static final String VALUE_SECRET_KEY_DEFAULT = "";
 }

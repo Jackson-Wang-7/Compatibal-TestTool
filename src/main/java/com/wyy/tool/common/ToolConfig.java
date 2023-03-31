@@ -28,6 +28,8 @@ public class ToolConfig {
     private int mixCreatePercentage;
     private String loopOps;
     private int loopCount;
+    private String accessKey;
+    private String secretKey;
 
     public static ToolConfig getInstance() {
         return config;
@@ -59,6 +61,8 @@ public class ToolConfig {
         mixCreatePercentage = Integer.valueOf(props.getProperty(Constants.KEY_MIX_CREATE_PERCENTAGE, Constants.VALUE_MIX_CREATE_PERCENTAGE));
         loopOps = props.getProperty(Constants.KEY_OPS, Constants.VALUE_OPS_DEFAULT);
         loopCount = Integer.valueOf(props.getProperty(Constants.KEY_LOOP_COUNT, Constants.VALUE_LOOP_COUNT_DEFAULT));
+        accessKey = props.getProperty(Constants.KEY_ACCESS_KEY, Constants.VALUE_ACCESS_KEY_DEFAULT);
+        secretKey = props.getProperty(Constants.KEY_SECRET_KEY, Constants.VALUE_SECRET_KEY_DEFAULT);
     }
 
     public String getHost() {
@@ -143,5 +147,13 @@ public class ToolConfig {
 
     public String getBucketName() {
         return bucketName;
+    }
+
+    public String getAccessKey() {
+        return accessKey;
+    }
+
+    public String getSecretKey() {
+        return secretKey;
     }
 }
