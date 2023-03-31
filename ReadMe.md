@@ -8,12 +8,12 @@ configuration attributes.
 You can easily get the tar package with `mvn package` and then you can find the “Compatibility-TestTool-xxxx-snapshot.tar.gz” 
 under “/target” directory. Then you can move this package to the client env node and decompress it.
 After decompression, you can see these files and directory in the decompressed directory.
-> /common-logging.properties 
-> /Compatibility-TestTool-1.1-alpha.jar
-> /config.properties
-> /core-site.xml
-> /lib/
-> /log4j.properties
+> /common-logging.properties  
+> /Compatibility-TestTool-1.1-alpha.jar  
+> /config.properties  
+> /core-site.xml  
+> /lib/  
+> /log4j.properties  
 
 
 * Generate a tar file by `mvn clean package` firstly.
