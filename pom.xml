@@ -5,44 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.testtool</groupId>
-    <artifactId>Compatibility-TestTool</artifactId>
+    <artifactId>compatibility-TestTool</artifactId>
     <version>1.1-alpha</version>
-
-<!--    <build>-->
-<!--        <plugins>-->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-compiler-plugin</artifactId>-->
-<!--                <configuration>-->
-<!--                    <source>1.8</source>-->
-<!--                    <target>1.8</target>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-shade-plugin</artifactId>-->
-<!--                <version>3.2.0</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <goals>-->
-<!--                            <goal>shade</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <transformers>-->
-<!--                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
-<!--                                    <manifestEntries>-->
-<!--                                        <Main-Class>sg.bigo.hdfs.HdfsTest</Main-Class>-->
-<!--                                        <X-Compile-Source-JDK>1.8</X-Compile-Source-JDK>-->
-<!--                                        <X-Compile-Target-JDK>1.8</X-Compile-Target-JDK>-->
-<!--                                    </manifestEntries>-->
-<!--                                </transformer>-->
-<!--                            </transformers>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-<!--        </plugins>-->
-<!--    </build>-->
 
     <build>
         <plugins>
@@ -96,10 +60,12 @@
     </build>
 
     <properties>
-        <lombok.version>1.16.20</lombok.version>
+        <lombok.version>1.18.2</lombok.version>
         <hadoop.version>3.3.1</hadoop.version>
-        <alluxio.version>2.9.0-SNAPSHOT</alluxio.version>
+        <alluxio.version>3.x-2.0.0-SNAPSHOT</alluxio.version>
         <metrics.version>4.2.0</metrics.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
     <dependencies>
@@ -147,6 +113,10 @@
                 <exclusion>
                     <groupId>com.google.protobuf</groupId>
                     <artifactId>protobuf-java</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.grpc</groupId>
+                    <artifactId>grpc-core</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

@@ -7,6 +7,7 @@ public enum OpCode {
   READ("read"),
   CHECK_STATUS("check"),
   REST_READ("rest-read"),
+  RANGE_READ("range-read"),
   DELETE("delete"),
   MIX("mix"),
   LOOP("loop");

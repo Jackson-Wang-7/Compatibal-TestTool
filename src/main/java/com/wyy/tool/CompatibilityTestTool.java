@@ -48,7 +48,8 @@ public class CompatibilityTestTool {
         AbstractTask task;
         if (OpCode.CHECK_STATUS.getOpValue().equals(operation) ||
             OpCode.READ.getOpValue().equals(operation) ||
-            OpCode.REST_READ.getOpValue().equals(operation)) {
+            OpCode.REST_READ.getOpValue().equals(operation) ||
+            OpCode.RANGE_READ.getOpValue().equals(operation)) {
             task = new ReadFileTask(conf, operation);
         } else if (OpCode.CREATE.getOpValue().equals(operation) ||
             OpCode.REST_CREATE.getOpValue().equals(operation) ||

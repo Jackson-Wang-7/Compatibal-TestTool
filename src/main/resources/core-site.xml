@@ -28,12 +28,12 @@
         <value>org.apache.hadoop.fs.LocalFileSystem</value>
     </property>
     <property>
-        <name>fs.hdfs.impl</name>
-        <value>org.apache.hadoop.hdfs.DistributedFileSystem</value>
-    </property>
-    <property>
         <name>fs.alluxio.impl</name>
         <value>alluxio.hadoop.FileSystem</value>
+    </property>
+    <property>
+        <name>fs.hdfs.impl</name>
+        <value>org.apache.hadoop.hdfs.DistributedFileSystem</value>
     </property>
     <property>
         <name>fs.s3a.aws.credentials.provider</name>
