@@ -84,7 +84,7 @@ public class CreateTask extends AbstractTask {
             if (OpCode.CREATE.getOpValue().equals(operation)) {
                 String dst = HostName + workPath + "/TestThread-" + i + "/";
                 task = new CreateSubTask(src, dst, userName, nameLists.get(i), fileSize, conf, latch);
-            } else if (OpCode.REST_CREATE.getOpValue().equals(operation)) {
+            } else if (OpCode.S3_CREATE.getOpValue().equals(operation)) {
                 String dst = workPath + "/TestThread-" + i + "/";
                 task = new RestCreateSubTask(src, bucket, dst, userName, nameLists.get(i), fileSize,
                     conf, latch);

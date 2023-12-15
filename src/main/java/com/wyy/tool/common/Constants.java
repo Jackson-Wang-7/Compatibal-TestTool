@@ -94,4 +94,9 @@ public class Constants {
     public static final String KEY_SECRET_KEY = "secret_key";
 
     public static final String VALUE_SECRET_KEY_DEFAULT = "";
+
+    public static final String KEY_RANGE_SIZE = "range_read_size";
+
+    // default 8M
+    public static final String VALUE_RANGE_SIZE_DEFAULT = "8388608";
 }

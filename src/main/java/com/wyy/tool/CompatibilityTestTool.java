@@ -1,24 +1,18 @@
 package com.wyy.tool;
 
-import com.wyy.tool.common.MetricsSystem;
 import com.wyy.tool.common.OpCode;
 import com.wyy.tool.common.ToolConfig;
 import com.wyy.tool.task.AbstractTask;
 import com.wyy.tool.task.CreateTask;
 import com.wyy.tool.task.DeleteTask;
-import com.wyy.tool.task.DiffTask;
 import com.wyy.tool.task.LoopTask;
 import com.wyy.tool.task.MixTask;
-import com.wyy.tool.task.PReadFileTask;
 import com.wyy.tool.task.ReadFileTask;
-import com.wyy.tool.task.ReadTotalTask;
-import lombok.SneakyThrows;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 
@@ -52,7 +46,7 @@ public class CompatibilityTestTool {
             OpCode.RANGE_READ.getOpValue().equals(operation)) {
             task = new ReadFileTask(conf, operation);
         } else if (OpCode.CREATE.getOpValue().equals(operation) ||
-            OpCode.REST_CREATE.getOpValue().equals(operation) ||
+            OpCode.S3_CREATE.getOpValue().equals(operation) ||
             OpCode.MP_CREATE.getOpValue().equals(operation)) {
             task = new CreateTask(conf, operation);
         } else if (OpCode.DELETE.getOpValue().equals(operation)) {

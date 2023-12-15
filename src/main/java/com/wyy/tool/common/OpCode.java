@@ -2,12 +2,12 @@ package com.wyy.tool.common;
 
 public enum OpCode {
   CREATE("create"),
-  REST_CREATE("rest-create"),
+  S3_CREATE("s3-create"),
   MP_CREATE("multipart-upload"),
   READ("read"),
   CHECK_STATUS("check"),
   REST_READ("rest-read"),
-  RANGE_READ("range-read"),
+  RANGE_READ("s3-range-read"),
   DELETE("delete"),
   MIX("mix"),
   LOOP("loop");

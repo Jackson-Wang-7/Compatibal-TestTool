@@ -30,6 +30,7 @@ public class ToolConfig {
     private int loopCount;
     private String accessKey;
     private String secretKey;
+    private long rangeSize;
 
     public static ToolConfig getInstance() {
         return config;
@@ -63,6 +64,7 @@ public class ToolConfig {
         loopCount = Integer.valueOf(props.getProperty(Constants.KEY_LOOP_COUNT, Constants.VALUE_LOOP_COUNT_DEFAULT));
         accessKey = props.getProperty(Constants.KEY_ACCESS_KEY, Constants.VALUE_ACCESS_KEY_DEFAULT);
         secretKey = props.getProperty(Constants.KEY_SECRET_KEY, Constants.VALUE_SECRET_KEY_DEFAULT);
+        rangeSize = Integer.valueOf(props.getProperty(Constants.KEY_RANGE_SIZE, Constants.VALUE_RANGE_SIZE_DEFAULT));
     }
 
     public String getHost() {
@@ -155,5 +157,9 @@ public class ToolConfig {
 
     public String getSecretKey() {
         return secretKey;
+    }
+
+    public long getRangeSize() {
+        return rangeSize;
     }
 }
