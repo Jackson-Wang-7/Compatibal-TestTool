@@ -31,6 +31,7 @@ public class ToolConfig {
     private String accessKey;
     private String secretKey;
     private long rangeSize;
+    private boolean listThreadPrefix;
 
     public static ToolConfig getInstance() {
         return config;
@@ -42,29 +43,47 @@ public class ToolConfig {
 
         host = props.getProperty(Constants.KEY_HOST, Constants.VALUE_HOST_DEFAULT);
         restHost = props.getProperty(Constants.KEY_WEB_HOST, Constants.VALUE_WEB_HOST_DEFAULT);
-        opName = props.getProperty(Constants.KEY_OPERATION_NAME, Constants.VALUE_OPERATION_NAME_DEFAULT);
+        opName =
+            props.getProperty(Constants.KEY_OPERATION_NAME, Constants.VALUE_OPERATION_NAME_DEFAULT);
         userName = props.getProperty(Constants.KEY_USER_NAME, Constants.VALUE_USER_NAME_DEFAULT);
         workPath = props.getProperty(Constants.KEY_WORK_PATH, Constants.VALUE_WORK_PATH_DEFAULT);
-        bucketName = props.getProperty(Constants.KEY_BUCKET_NAME, Constants.VALUE_BUCKET_NAME_DEFAULT);
+        bucketName =
+            props.getProperty(Constants.KEY_BUCKET_NAME, Constants.VALUE_BUCKET_NAME_DEFAULT);
         configPath = props.getProperty(Constants.KEY_CONFIG_PATH, Constants.VALUE_CONFIG_DEFAULT);
-        totalThreads = Integer.parseInt(props.getProperty(Constants.KEY_TOTAL_THREADS, Constants.VALUE_TOTAL_THREADS_DEFAULT));
+        totalThreads = Integer.parseInt(
+            props.getProperty(Constants.KEY_TOTAL_THREADS, Constants.VALUE_TOTAL_THREADS_DEFAULT));
 
-        totalFiles = Integer.parseInt(props.getProperty(Constants.KEY_TOTAL_FILES, Constants.VALUE_TOTAL_FILES_DEFAULT));
-        createFileNameType = props.getProperty(Constants.KEY_CREATE_FILE_NAME_TYPE, Constants.VALUE_CREATE_FILE_NAME_DEFAULT);
-        createFilePath = props.getProperty(Constants.KEY_CREATE_FILE_PATH, Constants.VALUE_CREATE_FILE_PATH_DEFAULT);
-        createSizePerFile = Long.valueOf(props.getProperty(Constants.KEY_CREATE_SIZE_PER_FILE, Constants.VALUE_CREATE_SIZE_PER_FILE_DEFAULT));
-        createFilePrefix = props.getProperty(Constants.KEY_CREATE_FILE_PREFIX, Constants.VALUE_CREATE_FILE_PREFIX_DEFAULT);
+        totalFiles = Integer.parseInt(
+            props.getProperty(Constants.KEY_TOTAL_FILES, Constants.VALUE_TOTAL_FILES_DEFAULT));
+        createFileNameType = props.getProperty(Constants.KEY_CREATE_FILE_NAME_TYPE,
+            Constants.VALUE_CREATE_FILE_NAME_DEFAULT);
+        createFilePath = props.getProperty(Constants.KEY_CREATE_FILE_PATH,
+            Constants.VALUE_CREATE_FILE_PATH_DEFAULT);
+        createSizePerFile = Long.parseLong(props.getProperty(Constants.KEY_CREATE_SIZE_PER_FILE,
+            Constants.VALUE_CREATE_SIZE_PER_FILE_DEFAULT));
+        createFilePrefix = props.getProperty(Constants.KEY_CREATE_FILE_PREFIX,
+            Constants.VALUE_CREATE_FILE_PREFIX_DEFAULT);
 
-        readDurationTime = Long.valueOf(props.getProperty(Constants.KEY_READ_DURATION_TIME, Constants.VALUE_READ_DURATION_TIME_DEFAULT));
-        readBufferSize = Integer.valueOf(props.getProperty(Constants.KEY_READ_BUFFER_SIZE, Constants.VALUE_READ_BUFFER_SIZE_DEFAULT));
-        deleteFilePrefix = props.getProperty(Constants.KEY_DELETE_FILE_PREFIX, Constants.VALUE_DELETE_FILE_PREFIX_DEFAULT);
-        mixReadPercentage = Integer.valueOf(props.getProperty(Constants.KEY_MIX_READ_PERCENTAGE, Constants.VALUE_MIX_READ_PERCENTAGE));
-        mixCreatePercentage = Integer.valueOf(props.getProperty(Constants.KEY_MIX_CREATE_PERCENTAGE, Constants.VALUE_MIX_CREATE_PERCENTAGE));
+        readDurationTime = Long.parseLong(props.getProperty(Constants.KEY_READ_DURATION_TIME,
+            Constants.VALUE_READ_DURATION_TIME_DEFAULT));
+        readBufferSize = Integer.parseInt(props.getProperty(Constants.KEY_READ_BUFFER_SIZE,
+            Constants.VALUE_READ_BUFFER_SIZE_DEFAULT));
+        deleteFilePrefix = props.getProperty(Constants.KEY_DELETE_FILE_PREFIX,
+            Constants.VALUE_DELETE_FILE_PREFIX_DEFAULT);
+        mixReadPercentage = Integer.parseInt(props.getProperty(Constants.KEY_MIX_READ_PERCENTAGE,
+            Constants.VALUE_MIX_READ_PERCENTAGE));
+        mixCreatePercentage = Integer.parseInt(
+            props.getProperty(Constants.KEY_MIX_CREATE_PERCENTAGE,
+                Constants.VALUE_MIX_CREATE_PERCENTAGE));
         loopOps = props.getProperty(Constants.KEY_OPS, Constants.VALUE_OPS_DEFAULT);
-        loopCount = Integer.valueOf(props.getProperty(Constants.KEY_LOOP_COUNT, Constants.VALUE_LOOP_COUNT_DEFAULT));
+        loopCount = Integer.parseInt(
+            props.getProperty(Constants.KEY_LOOP_COUNT, Constants.VALUE_LOOP_COUNT_DEFAULT));
         accessKey = props.getProperty(Constants.KEY_ACCESS_KEY, Constants.VALUE_ACCESS_KEY_DEFAULT);
         secretKey = props.getProperty(Constants.KEY_SECRET_KEY, Constants.VALUE_SECRET_KEY_DEFAULT);
-        rangeSize = Integer.valueOf(props.getProperty(Constants.KEY_RANGE_SIZE, Constants.VALUE_RANGE_SIZE_DEFAULT));
+        rangeSize = Integer.parseInt(
+            props.getProperty(Constants.KEY_RANGE_SIZE, Constants.VALUE_RANGE_SIZE_DEFAULT));
+        listThreadPrefix =
+            Boolean.parseBoolean(props.getProperty(Constants.KEY_LIST_THREAD_PREFIX, "false"));
     }
 
     public String getHost() {
@@ -161,5 +180,9 @@ public class ToolConfig {
 
     public long getRangeSize() {
         return rangeSize;
+    }
+
+    public boolean isListThreadPrefix() {
+        return listThreadPrefix;
     }
 }

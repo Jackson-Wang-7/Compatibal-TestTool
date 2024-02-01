@@ -1,6 +1,6 @@
 package com.wyy.tool.task;
 
-import static com.amazonaws.services.s3.internal.Constants.KB;
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
@@ -8,7 +8,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3Object;
@@ -103,14 +102,20 @@ public class ReadFileTask extends AbstractTask {
     private void listFromS3(String userName, String workPath, Map<Integer, List<String>> nameLists) {
         String restHost = ToolConfig.getInstance().getRestHost();
         String bucket = ToolConfig.getInstance().getBucketName();
+        boolean listThread = ToolConfig.getInstance().isListThreadPrefix();
         AmazonS3 s3 = AmazonS3ClientBuilder.standard()
             .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(userName, "secretKey")))
             .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(restHost, ""))
             .enablePathStyleAccess()
             .build();
         for (int i=0;i<totalThreads;i++) {
-            int currentIndex = i % 20;
-            String prefix = workPath + "/TestThread-" + currentIndex + "/";
+            String prefix;
+            if (listThread) {
+                int currentIndex = i % 20;
+                prefix = workPath + "/TestThread-" + currentIndex + "/";
+            } else {
+                prefix = workPath;
+            }
             ListObjectsV2Result result = s3.listObjectsV2(bucket, prefix);
             List<String> names = new ArrayList<>();
             for (S3ObjectSummary summary : result.getObjectSummaries()) {
@@ -131,14 +136,7 @@ public class ReadFileTask extends AbstractTask {
                 FileStatus[] fileStatuses = fs.listStatus(new Path(dst));
                 List<String> names = new ArrayList<>();
                 for (FileStatus status : fileStatuses) {
-                    // rest read need the rest host name instead of default hostname
-                    if (OpCode.REST_READ.getOpValue().equals(operation) ||
-                        OpCode.RANGE_READ.getOpValue().equals(operation)) {
-                        names.add(
-                            workPath + "/TestThread-" + i + "/" + status.getPath().getName());
-                    } else {
-                        names.add(dst + status.getPath().getName());
-                    }
+                    names.add(dst + status.getPath().getName());
                 }
                 nameLists.put(i, names);
             }
@@ -290,14 +288,18 @@ public class ReadFileTask extends AbstractTask {
                 return;
             }
             String restHost = ToolConfig.getInstance().getRestHost();
+            String bucket = ToolConfig.getInstance().getBucketName();
             try {
                 while (true) {
                     for (String path : nameList) {
                         if (end.get()) {
                             return;
                         }
+                        if (path.endsWith("/")) {
+                            continue;
+                        }
                         try (Timer.Context context = timer.time()) {
-                            String restUrl = restHost + path;
+                            String restUrl = restHost + bucket + "/" + path;
                             String Authorization = String.format("AWS4-HMAC-SHA256 Credential=%s/3uRmVm7lWfvclsqfpPJN2Ftigi4=", user);
                             Header header = new BasicHeader("Authorization", Authorization);
                             ToolHttpClient.httpGetStream(restUrl, iopsMeter, header);
@@ -335,15 +337,20 @@ public class ReadFileTask extends AbstractTask {
             String restHost = ToolConfig.getInstance().getRestHost();
             String bucket = ToolConfig.getInstance().getBucketName();
             long rangeSize = ToolConfig.getInstance().getRangeSize();
+            ClientConfiguration clientConfiguration = new ClientConfiguration().withSocketTimeout(300 * 1000).withTcpKeepAlive(false);
             AmazonS3 s3 = AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(user, "secretKey")))
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(restHost, ""))
+                .withClientConfiguration(clientConfiguration)
                 .enablePathStyleAccess()
                 .build();
             int bufferSize = ToolConfig.getInstance().getReadBufferSize();
             try {
                 while (true) {
                     for (String path : nameList) {
+                        if (path.endsWith("/")) {
+                            continue;
+                        }
                         if (end.get()) {
                             return;
                         }
@@ -368,6 +375,7 @@ public class ReadFileTask extends AbstractTask {
                 int i = 0;
                 while (length > totalSize) {
                     GetObjectRequest getObjectRequest = new GetObjectRequest(bucket, path);
+                    getObjectRequest.putCustomRequestHeader("Connection", "close");
                     getObjectRequest.setRange((long) i * rangeSize,
                         (long) (i + 1) * rangeSize - 1);
                     S3Object object = s3.getObject(getObjectRequest);
@@ -379,9 +387,11 @@ public class ReadFileTask extends AbstractTask {
                         totalSize += readSize;
                         iopsMeter.mark(readSize);
                     }
-                    objectContent.close();
+                    object.close();
                     i++;
                 }
+            } catch (Exception e) {
+                log.error("read file {} exception:{}", path, e.getMessage());
             } finally {
                 qpsMeter.mark();
             }

@@ -95,8 +95,8 @@ public class ToolHttpClient {
             }
         };
         RequestConfig config = RequestConfig.custom()
-                .setConnectTimeout(5000)
-                .setConnectionRequestTimeout(5000)
+                .setConnectTimeout(60000)
+                .setConnectionRequestTimeout(300000)
                 .setSocketTimeout(300000)
                 .build();
         CloseableHttpClient httpClient = HttpClients.custom()
