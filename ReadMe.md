@@ -134,8 +134,8 @@ You can send http requests to Alluxio S3 Rest Server. If you want to try this wa
 configurations in the “config.properties”:
 ```
 ##-----------common----------##
-# in this case, op can be rest-create/rest-read/loop
-op_name=rest-read
+# in this case, op can be s3-create/s3-range-read/rest-read/loop
+op_name=s3-range-read
 work_path=/test_benchmark_fs
 total_threads=10
 user_name=alluxio
@@ -149,10 +149,14 @@ create_size_per_file=100
 
 ##-----------read------------##
 read_duration_time=200
+# buffer size in reading task, unit: Byte, default: 1M
 read_buffer_size=1048576
+# range size in one single range read, unit: Byte, default: 8M
+range_read_size=8388608
+list_thread_prefix=false
 
 ##-----------rest-read-------##
-web_host=http://localhost:39999/api/v1/s3
+web_host=http://localhost:29998
 ```
 
 ## Check test result
