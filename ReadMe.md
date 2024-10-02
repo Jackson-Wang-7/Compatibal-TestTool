@@ -131,7 +131,7 @@ And you need to update these configurations in the “core-site.xml”:
 - HTTP Request
 
 You can send http requests to Alluxio S3 Rest Server. If you want to try this way, you need to change these 
-configurations in the “config.properties”:
+configurations in the “config.properties”: (this case is for S3 range read, and each range is 8MB)
 ```
 ##-----------common----------##
 # in this case, op can be s3-create/s3-range-read/rest-read/loop
