@@ -1,5 +1,5 @@
 <assembly>
-    <id>snapshot</id>
+    <id>release</id>
     <formats>
         <format>tar.gz</format>
     </formats>

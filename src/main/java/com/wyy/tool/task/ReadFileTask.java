@@ -130,9 +130,15 @@ public class ReadFileTask extends AbstractTask {
         try {
             URI uri = new URI(HostName + workPath);
             FileSystem fs = FileSystem.get(uri, conf, userName);
+            boolean listThread = ToolConfig.getInstance().isListThreadPrefix();
             for (int i = 0; i < totalThreads; i++) {
-                int currentIndex = i % 20;
-                String dst = HostName + workPath + "/TestThread-" + currentIndex + "/";
+                String dst;
+                if (listThread) {
+                    int currentIndex = i % 20;
+                    dst = HostName + workPath + "/TestThread-" + currentIndex + "/";
+                } else {
+                    dst = workPath;
+                }
                 FileStatus[] fileStatuses = fs.listStatus(new Path(dst));
                 List<String> names = new ArrayList<>();
                 for (FileStatus status : fileStatuses) {
@@ -174,6 +180,7 @@ public class ReadFileTask extends AbstractTask {
                         if (end.get()) {
                             return;
                         }
+//                        rangeReadPath(fs, path);
                         readPath(fs, path);
                     }
                 }
@@ -189,6 +196,45 @@ public class ReadFileTask extends AbstractTask {
                     }
                 }
                 latch.countDown();
+            }
+        }
+
+        private void rangeReadPath(FileSystem fs, String path) {
+            Path srcPath = new Path(path);
+            int bufferSize = ToolConfig.getInstance().getReadBufferSize();
+            int rangeSize = (int) ToolConfig.getInstance().getRangeSize();
+            bufferSize = Math.min(bufferSize, rangeSize);
+            byte[] b = new byte[bufferSize];
+            int length = 0;
+            FSDataInputStream in = null;
+            long start = 0;
+            while (length >= 0) {
+                if (end.get()) {
+                    return;
+                }
+                try (Timer.Context context = timer.time()) {
+                    in = fs.open(srcPath);
+                    in.seek(start);
+                    BufferedInputStream buffer = new BufferedInputStream(in, bufferSize);
+                    int currentRead = 0;
+                    while ((currentRead < rangeSize) &&
+                        (length = buffer.read(b, 0, rangeSize)) > 0) {
+                        iopsMeter.mark(length);
+                        currentRead += length;
+                    }
+                    start += currentRead;
+                } catch (IOException e) {
+                    log.error("read file " + path + " failed! ", e);
+                } finally {
+                    if (in != null) {
+                        try {
+                            in.close();
+                        } catch (IOException ioException) {
+                            log.warn("read file " + path + " close stream failed. ");
+                        }
+                    }
+                    qpsMeter.mark();
+                }
             }
         }
 
@@ -367,13 +413,16 @@ public class ReadFileTask extends AbstractTask {
         private void rangeReadS3(String bucket, AmazonS3 s3, long rangeSize, int bufferSize,
                                  String path)
             throws IOException {
-            try (Timer.Context context = timer.time()) {
-                GetObjectMetadataRequest request = new GetObjectMetadataRequest(bucket, path);
-                ObjectMetadata meta = s3.getObjectMetadata(request);
-                long length = meta.getContentLength();
-                long totalSize = 0;
-                int i = 0;
-                while (length > totalSize) {
+            GetObjectMetadataRequest request = new GetObjectMetadataRequest(bucket, path);
+            ObjectMetadata meta = s3.getObjectMetadata(request);
+            long length = meta.getContentLength();
+            long totalSize = 0;
+            int i = 0;
+            while (length > totalSize) {
+                if (end.get()) {
+                    return;
+                }
+                try (Timer.Context context = timer.time()) {
                     GetObjectRequest getObjectRequest = new GetObjectRequest(bucket, path);
                     getObjectRequest.putCustomRequestHeader("Connection", "close");
                     getObjectRequest.setRange((long) i * rangeSize,
@@ -389,11 +438,11 @@ public class ReadFileTask extends AbstractTask {
                     }
                     object.close();
                     i++;
+                } catch (Exception e) {
+                    log.error("read file {} exception:{}", path, e.getMessage());
+                } finally {
+                    qpsMeter.mark();
                 }
-            } catch (Exception e) {
-                log.error("read file {} exception:{}", path, e.getMessage());
-            } finally {
-                qpsMeter.mark();
             }
         }
     }

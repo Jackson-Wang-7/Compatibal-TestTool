@@ -62,7 +62,7 @@
     <properties>
         <lombok.version>1.18.2</lombok.version>
         <hadoop.version>3.3.1</hadoop.version>
-        <alluxio.version>3.x-2.0.0-SNAPSHOT</alluxio.version>
+        <alluxio.version>3.x-7.0.0-SNAPSHOT</alluxio.version>
         <metrics.version>4.2.0</metrics.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

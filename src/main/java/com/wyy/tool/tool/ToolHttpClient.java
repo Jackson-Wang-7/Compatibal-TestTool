@@ -56,9 +56,9 @@ public class ToolHttpClient {
             Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create().register("http", PlainConnectionSocketFactory.getSocketFactory()).register("https", sslsf).build();
             // 初始化连接管理器
             poolConnManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-            poolConnManager.setMaxTotal(640);// 同时最多连接数
+            poolConnManager.setMaxTotal(1000);// 同时最多连接数
             // 设置最大路由
-            poolConnManager.setDefaultMaxPerRoute(320);
+            poolConnManager.setDefaultMaxPerRoute(500);
             // 此处解释下MaxtTotal和DefaultMaxPerRoute的区别：
             // 1、MaxtTotal是整个池子的大小；
             // 2、DefaultMaxPerRoute是根据连接到的主机对MaxTotal的一个细分；比如：
