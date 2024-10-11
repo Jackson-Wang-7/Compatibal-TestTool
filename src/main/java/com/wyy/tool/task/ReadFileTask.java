@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -417,7 +418,10 @@ public class ReadFileTask extends AbstractTask {
             ObjectMetadata meta = s3.getObjectMetadata(request);
             long length = meta.getContentLength();
             long totalSize = 0;
-            int i = 0;
+//            int i = 0;
+            int partNumber = (int) (length / rangeSize);
+            Random rand = new Random();
+            int randomNum = rand.nextInt(partNumber);
             while (length > totalSize) {
                 if (end.get()) {
                     return;
@@ -425,8 +429,10 @@ public class ReadFileTask extends AbstractTask {
                 try (Timer.Context context = timer.time()) {
                     GetObjectRequest getObjectRequest = new GetObjectRequest(bucket, path);
                     getObjectRequest.putCustomRequestHeader("Connection", "close");
-                    getObjectRequest.setRange((long) i * rangeSize,
-                        (long) (i + 1) * rangeSize - 1);
+//                    getObjectRequest.setRange((long) i * rangeSize,
+//                        (long) (i + 1) * rangeSize - 1);
+                    getObjectRequest.setRange((long) randomNum * rangeSize,
+                        (long) (randomNum + 1) * rangeSize - 1);
                     S3Object object = s3.getObject(getObjectRequest);
                     S3ObjectInputStream objectContent = object.getObjectContent();
 
@@ -437,7 +443,7 @@ public class ReadFileTask extends AbstractTask {
                         iopsMeter.mark(readSize);
                     }
                     object.close();
-                    i++;
+//                    i++;
                 } catch (Exception e) {
                     log.error("read file {} exception:{}", path, e.getMessage());
                 } finally {
