@@ -32,6 +32,7 @@ public class ToolConfig {
     private String secretKey;
     private long rangeSize;
     private boolean listThreadPrefix;
+    private boolean tcpKeepAlive;
 
     public static ToolConfig getInstance() {
         return config;
@@ -84,6 +85,8 @@ public class ToolConfig {
             props.getProperty(Constants.KEY_RANGE_SIZE, Constants.VALUE_RANGE_SIZE_DEFAULT));
         listThreadPrefix =
             Boolean.parseBoolean(props.getProperty(Constants.KEY_LIST_THREAD_PREFIX, "false"));
+        tcpKeepAlive =
+            Boolean.parseBoolean(props.getProperty(Constants.TCP_KEEP_ALIVE, "false"));
     }
 
     public String getHost() {
@@ -184,5 +187,9 @@ public class ToolConfig {
 
     public boolean isListThreadPrefix() {
         return listThreadPrefix;
+    }
+
+    public boolean isTcpKeepAlive() {
+        return tcpKeepAlive;
     }
 }

@@ -181,8 +181,8 @@ public class ReadFileTask extends AbstractTask {
                         if (end.get()) {
                             return;
                         }
-//                        rangeReadPath(fs, path);
-                        readPath(fs, path);
+                        rangeReadPath(fs, path);
+//                        readPath(fs, path);
                     }
                 }
             } catch (Exception e) {
@@ -384,7 +384,9 @@ public class ReadFileTask extends AbstractTask {
             String restHost = ToolConfig.getInstance().getRestHost();
             String bucket = ToolConfig.getInstance().getBucketName();
             long rangeSize = ToolConfig.getInstance().getRangeSize();
-            ClientConfiguration clientConfiguration = new ClientConfiguration().withSocketTimeout(300 * 1000).withTcpKeepAlive(false);
+            boolean keepAlive = ToolConfig.getInstance().isTcpKeepAlive();
+            ClientConfiguration clientConfiguration =
+                new ClientConfiguration().withSocketTimeout(300 * 1000).withTcpKeepAlive(keepAlive);
             AmazonS3 s3 = AmazonS3ClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(user, "secretKey")))
                 .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(restHost, ""))
@@ -401,7 +403,7 @@ public class ReadFileTask extends AbstractTask {
                         if (end.get()) {
                             return;
                         }
-                        rangeReadS3(bucket, s3, rangeSize, bufferSize, path);
+                        rangeReadS3(bucket, s3, rangeSize, bufferSize, path, keepAlive);
                     }
                 }
             } catch (Exception e) {
@@ -412,7 +414,7 @@ public class ReadFileTask extends AbstractTask {
         }
 
         private void rangeReadS3(String bucket, AmazonS3 s3, long rangeSize, int bufferSize,
-                                 String path)
+                                 String path, boolean keepAlive)
             throws IOException {
             GetObjectMetadataRequest request = new GetObjectMetadataRequest(bucket, path);
             ObjectMetadata meta = s3.getObjectMetadata(request);
@@ -428,7 +430,9 @@ public class ReadFileTask extends AbstractTask {
                 }
                 try (Timer.Context context = timer.time()) {
                     GetObjectRequest getObjectRequest = new GetObjectRequest(bucket, path);
-                    getObjectRequest.putCustomRequestHeader("Connection", "close");
+                    if (!keepAlive) {
+                        getObjectRequest.putCustomRequestHeader("Connection", "close");
+                    }
 //                    getObjectRequest.setRange((long) i * rangeSize,
 //                        (long) (i + 1) * rangeSize - 1);
                     getObjectRequest.setRange((long) randomNum * rangeSize,
