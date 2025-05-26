@@ -5,8 +5,10 @@ import com.wyy.tool.common.ToolConfig;
 import com.wyy.tool.task.AbstractTask;
 import com.wyy.tool.task.CreateTask;
 import com.wyy.tool.task.DeleteTask;
+import com.wyy.tool.task.ListTask;
 import com.wyy.tool.task.LoopTask;
 import com.wyy.tool.task.MixTask;
+import com.wyy.tool.task.ParquetReadTask;
 import com.wyy.tool.task.ReadFileTask;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -14,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-
 
 public class CompatibilityTestTool {
     final static Logger log = LoggerFactory.getLogger(CompatibilityTestTool.class);
@@ -51,6 +52,10 @@ public class CompatibilityTestTool {
             task = new CreateTask(conf, operation);
         } else if (OpCode.DELETE.getOpValue().equals(operation)) {
             task = new DeleteTask(conf);
+        } else if (OpCode.S3_LIST.getOpValue().equals(operation)) {
+            task = new ListTask(conf, operation);
+        } else if (OpCode.PARQUET_RAW.getOpValue().equals(operation)) {
+            task = new ParquetReadTask(conf, operation);
         } else if (OpCode.LOOP.getOpValue().equals(operation)) {
             task = new LoopTask(conf);
         } else if (OpCode.MIX.getOpValue().equals(operation)) {

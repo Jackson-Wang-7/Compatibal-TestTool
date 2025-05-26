@@ -103,4 +103,6 @@ public class Constants {
     public static final String KEY_LIST_THREAD_PREFIX = "list_thread_prefix";
 
     public static final String TCP_KEEP_ALIVE = "tcp_keep_alive";
+
+    public static final String PARQUET_REQUEST_PATH = "parquet_request_path";
 }

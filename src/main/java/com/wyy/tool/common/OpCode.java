@@ -8,6 +8,8 @@ public enum OpCode {
   CHECK_STATUS("check"),
   REST_READ("rest-read"),
   RANGE_READ("s3-range-read"),
+  S3_LIST("s3-list"),
+  PARQUET_RAW("parquet-raw"),
   DELETE("delete"),
   MIX("mix"),
   LOOP("loop");

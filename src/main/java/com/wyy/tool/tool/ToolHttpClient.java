@@ -1,5 +1,7 @@
 package com.wyy.tool.tool;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManagerFactory;
 import com.codahale.metrics.Meter;
 import com.wyy.tool.common.ToolConfig;
 import org.apache.commons.lang3.StringUtils;
@@ -37,43 +39,75 @@ import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.KeyStore;
 
 public class ToolHttpClient {
     private static Logger log = LoggerFactory.getLogger(ToolHttpClient.class);
 
     private static PoolingHttpClientConnectionManager poolConnManager = null;
 
-    private static CloseableHttpClient httpClient;
-    static {
+    private final CloseableHttpClient httpClient;
+
+    private final static ToolHttpClient INSTANCE = new ToolHttpClient();
+
+    public ToolHttpClient() {
         try {
-            SSLContextBuilder builder = new SSLContextBuilder();
-            builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
-            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
+//            SSLContextBuilder builder = new SSLContextBuilder();
+//            KeyStore truststore = KeyStore.getInstance("JKS");
+//            try (FileInputStream fis = new FileInputStream(new File("/Users/wangyuyang/code/3-3/enterprise/keystore/truststore.jks"))) {
+//                char[] truststorePassword = "trustpass".toCharArray();
+//                truststore.load(fis, truststorePassword);
+//            }
+//            builder.loadTrustMaterial(truststore, null);
+
+//            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
+
+            String trustStorePath = "/Users/wangyuyang/code/3-3/enterprise/keystore/truststore.jks";
+            String trustStorePassword = "trustpass";
+            SSLContext sslContext = createSslContext(trustStorePath, trustStorePassword);
+            SSLConnectionSocketFactory sslSocketFactory = new SSLConnectionSocketFactory(sslContext);
+
             // 配置同时支持 HTTP 和 HTPPS
-            Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create().register("http", PlainConnectionSocketFactory.getSocketFactory()).register("https", sslsf).build();
+            Registry<ConnectionSocketFactory> socketFactoryRegistry =
+                RegistryBuilder.<ConnectionSocketFactory>create()
+                    .register("http", PlainConnectionSocketFactory.getSocketFactory())
+                    .register("https", sslSocketFactory).build();
             // 初始化连接管理器
             poolConnManager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
             poolConnManager.setMaxTotal(1000);// 同时最多连接数
             // 设置最大路由
             poolConnManager.setDefaultMaxPerRoute(500);
-            // 此处解释下MaxtTotal和DefaultMaxPerRoute的区别：
-            // 1、MaxtTotal是整个池子的大小；
-            // 2、DefaultMaxPerRoute是根据连接到的主机对MaxTotal的一个细分；比如：
-            // MaxtTotal=400 DefaultMaxPerRoute=200
-            // 而我只连接到http://www.abc.com时，到这个主机的并发最多只有200；而不是400；
-            // 而我连接到http://www.bac.com 和
-            // http://www.ccd.com时，到每个主机的并发最多只有200；即加起来是400（但不能超过400）；所以起作用的设置是DefaultMaxPerRoute
-            // 初始化httpClient
-            httpClient = getConnection();
         } catch (Exception e) {
             log.warn("http client init exception:", e);
         }
+        httpClient = getConnection();
     }
 
-    public static CloseableHttpClient getConnection() {
+    public static ToolHttpClient getInstance() {
+        return INSTANCE;
+    }
+
+    private static final SSLContext createSslContext(String trustStorePath, String trustStorePassword) throws Exception {
+        KeyStore trustStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        try (FileInputStream fis = new FileInputStream(trustStorePath)) {
+            trustStore.load(fis, trustStorePassword.toCharArray());
+        }
+
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+        tmf.init(trustStore);
+
+        SSLContext sslContext = SSLContext.getInstance("SSL");
+        sslContext.init(null, tmf.getTrustManagers(), new java.security.SecureRandom());
+
+        return sslContext;
+    }
+
+    private CloseableHttpClient getConnection() {
         ConnectionKeepAliveStrategy keepAliveStrategy = new ConnectionKeepAliveStrategy() {
             public long getKeepAliveDuration(HttpResponse response, HttpContext context) {
                 // Honor 'keep-alive' header
@@ -101,6 +135,7 @@ public class ToolHttpClient {
                 .build();
         CloseableHttpClient httpClient = HttpClients.custom()
                 // 设置连接池管理
+//                .setSSLSocketFactory()
                 .setConnectionManager(poolConnManager)
                 .setKeepAliveStrategy(keepAliveStrategy)
                 .setDefaultRequestConfig(config)
@@ -110,7 +145,7 @@ public class ToolHttpClient {
         return httpClient;
     }
 
-    public static String httpGet(String url, Header... heads) {
+    public String httpGet(String url, Header... heads) {
         HttpGet httpGet = new HttpGet(url);
         CloseableHttpResponse response = null;
 
@@ -140,7 +175,7 @@ public class ToolHttpClient {
         return null;
     }
 
-    public static boolean httpGetStream(String url, Meter ioMeter, Header... heads) {
+    public boolean httpGetStream(String url, Meter ioMeter, Header... heads) {
         HttpGet httpGet = new HttpGet(url);
         CloseableHttpResponse response = null;
 
@@ -178,7 +213,7 @@ public class ToolHttpClient {
         return false;
     }
 
-    public static String httpPost(String uri, String params, Header... heads) {
+    public String httpPost(String uri, String params, Header... heads) {
         HttpPost httpPost = new HttpPost(uri);
         CloseableHttpResponse response = null;
         try {

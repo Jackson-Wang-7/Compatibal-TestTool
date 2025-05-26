@@ -62,9 +62,10 @@
     <properties>
         <lombok.version>1.18.2</lombok.version>
         <hadoop.version>3.3.1</hadoop.version>
-<!--        <alluxio.version>3.x-7.0.0-SNAPSHOT</alluxio.version>-->
-        <alluxio.version>2.10.0-SNAPSHOT</alluxio.version>
+        <alluxio.version>3.x-11.0.0-SNAPSHOT</alluxio.version>
+<!--        <alluxio.version>2.10.0-SNAPSHOT</alluxio.version>-->
         <metrics.version>4.2.0</metrics.version>
+        <log4j.version>2.17.1</log4j.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
@@ -115,10 +116,6 @@
                     <groupId>com.google.protobuf</groupId>
                     <artifactId>protobuf-java</artifactId>
                 </exclusion>
-<!--                <exclusion>-->
-<!--                    <groupId>io.grpc</groupId>-->
-<!--                    <artifactId>grpc-core</artifactId>-->
-<!--                </exclusion>-->
             </exclusions>
         </dependency>
         <dependency>

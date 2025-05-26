@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.Properties;
 
 public class ToolConfig {
-    private static ToolConfig config = new ToolConfig();
+    private final static ToolConfig config = new ToolConfig();
 
     private String host;
     private String restHost;
@@ -33,6 +33,7 @@ public class ToolConfig {
     private long rangeSize;
     private boolean listThreadPrefix;
     private boolean tcpKeepAlive;
+    private String parquetRequestPath;
 
     public static ToolConfig getInstance() {
         return config;
@@ -87,6 +88,7 @@ public class ToolConfig {
             Boolean.parseBoolean(props.getProperty(Constants.KEY_LIST_THREAD_PREFIX, "false"));
         tcpKeepAlive =
             Boolean.parseBoolean(props.getProperty(Constants.TCP_KEEP_ALIVE, "false"));
+        parquetRequestPath = props.getProperty(Constants.PARQUET_REQUEST_PATH, "");
     }
 
     public String getHost() {
@@ -191,5 +193,9 @@ public class ToolConfig {
 
     public boolean isTcpKeepAlive() {
         return tcpKeepAlive;
+    }
+
+    public String getParquetRequestPath() {
+        return parquetRequestPath;
     }
 }

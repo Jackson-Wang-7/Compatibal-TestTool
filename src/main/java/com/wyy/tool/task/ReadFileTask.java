@@ -91,7 +91,7 @@ public class ReadFileTask extends AbstractTask {
             latch.await(durationTime, TimeUnit.SECONDS);
             end.set(true);
             log.warn("all tasks should meet the end.");
-            latch.await();
+            latch.await(10, TimeUnit.SECONDS);
         } catch (Exception e) {
             log.warn("CheckStatusTask: execute task error,exception:", e);
         } finally {
@@ -349,7 +349,7 @@ public class ReadFileTask extends AbstractTask {
                             String restUrl = restHost + bucket + "/" + path;
                             String Authorization = String.format("AWS4-HMAC-SHA256 Credential=%s/3uRmVm7lWfvclsqfpPJN2Ftigi4=", user);
                             Header header = new BasicHeader("Authorization", Authorization);
-                            ToolHttpClient.httpGetStream(restUrl, iopsMeter, header);
+                            ToolHttpClient.getInstance().httpGetStream(restUrl, iopsMeter, header);
                         } finally {
                             qpsMeter.mark();
                         }
@@ -378,23 +378,26 @@ public class ReadFileTask extends AbstractTask {
 
         @Override
         public void run() {
-            if (nameList.isEmpty()) {
-                return;
-            }
-            String restHost = ToolConfig.getInstance().getRestHost();
-            String bucket = ToolConfig.getInstance().getBucketName();
-            long rangeSize = ToolConfig.getInstance().getRangeSize();
-            boolean keepAlive = ToolConfig.getInstance().isTcpKeepAlive();
-            ClientConfiguration clientConfiguration =
-                new ClientConfiguration().withSocketTimeout(300 * 1000).withTcpKeepAlive(keepAlive);
-            AmazonS3 s3 = AmazonS3ClientBuilder.standard()
-                .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(user, "secretKey")))
-                .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(restHost, ""))
-                .withClientConfiguration(clientConfiguration)
-                .enablePathStyleAccess()
-                .build();
-            int bufferSize = ToolConfig.getInstance().getReadBufferSize();
             try {
+                if (nameList.isEmpty()) {
+                    return;
+                }
+                String restHost = ToolConfig.getInstance().getRestHost();
+                String bucket = ToolConfig.getInstance().getBucketName();
+                long rangeSize = ToolConfig.getInstance().getRangeSize();
+                boolean keepAlive = ToolConfig.getInstance().isTcpKeepAlive();
+                ClientConfiguration clientConfiguration =
+                    new ClientConfiguration().withSocketTimeout(300 * 1000)
+                        .withTcpKeepAlive(keepAlive);
+                AmazonS3 s3 = AmazonS3ClientBuilder.standard()
+                    .withCredentials(new AWSStaticCredentialsProvider(
+                        new BasicAWSCredentials(user, "secretKey")))
+                    .withEndpointConfiguration(
+                        new AwsClientBuilder.EndpointConfiguration(restHost, ""))
+                    .withClientConfiguration(clientConfiguration)
+                    .enablePathStyleAccess()
+                    .build();
+                int bufferSize = ToolConfig.getInstance().getReadBufferSize();
                 while (true) {
                     for (String path : nameList) {
                         if (path.endsWith("/")) {
