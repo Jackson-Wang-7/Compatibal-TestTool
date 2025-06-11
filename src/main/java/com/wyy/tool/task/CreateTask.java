@@ -1,5 +1,6 @@
 package com.wyy.tool.task;
 
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
@@ -221,6 +222,7 @@ public class CreateTask extends AbstractTask {
         @Override
         public void run() {
             try {
+                boolean keepAlive = ToolConfig.getInstance().isTcpKeepAlive();
                 String HostName = ToolConfig.getInstance().getRestHost();
                 BasicAWSCredentials awsCreds = new BasicAWSCredentials(user, "secret_key_id");
                 AmazonS3 s3 =
@@ -228,6 +230,9 @@ public class CreateTask extends AbstractTask {
                         .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
                         .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(
                             HostName, "xx"))
+                        .withClientConfiguration(
+                            new ClientConfiguration().withSocketTimeout(300 * 1000)
+                                .withTcpKeepAlive(keepAlive))
                         .enablePathStyleAccess()
                         .build();
                 for (String name : nameList) {

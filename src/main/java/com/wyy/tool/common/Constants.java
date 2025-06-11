@@ -95,6 +95,10 @@ public class Constants {
 
     public static final String VALUE_SECRET_KEY_DEFAULT = "";
 
+    public static final String KEY_S3_REGION = "s3_region";
+
+    public static final String VALUE_S3_REGION_DEFAULT = "us-east-1";
+
     public static final String KEY_RANGE_SIZE = "range_read_size";
 
     // default 8M

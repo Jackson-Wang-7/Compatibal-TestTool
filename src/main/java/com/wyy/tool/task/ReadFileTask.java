@@ -1,18 +1,6 @@
 package com.wyy.tool.task;
 
 import com.amazonaws.ClientConfiguration;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.client.builder.AwsClientBuilder;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.GetObjectMetadataRequest;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ListObjectsV2Result;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.codahale.metrics.Timer;
 import com.wyy.tool.common.MetricsSystem;
 import com.wyy.tool.common.OpCode;
@@ -28,10 +16,24 @@ import org.apache.http.message.BasicHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.wyy.tool.common.ToolConfig;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.core.async.AsyncResponseTransformer;
+import software.amazon.awssdk.http.crt.AwsCrtAsyncHttpClient;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3AsyncClient;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,7 +66,7 @@ public class ReadFileTask extends AbstractTask {
         Map<Integer, List<String>> nameLists = new HashMap();
         if (OpCode.RANGE_READ.getOpValue().equals(operation) ||
             OpCode.REST_READ.getOpValue().equals(operation)) {
-            listFromS3(userName, workPath, nameLists);
+            listFromS3(workPath, nameLists);
         } else {
             listFromFS(userName, HostName, workPath, nameLists);
         }
@@ -100,15 +102,31 @@ public class ReadFileTask extends AbstractTask {
         }
     }
 
-    private void listFromS3(String userName, String workPath, Map<Integer, List<String>> nameLists) {
+    private void listFromS3(String workPath, Map<Integer, List<String>> nameLists) {
         String restHost = ToolConfig.getInstance().getRestHost();
         String bucket = ToolConfig.getInstance().getBucketName();
+        String ak = ToolConfig.getInstance().getAccessKey();
+        String sk = ToolConfig.getInstance().getSecretKey();
+        String region = ToolConfig.getInstance().getRegion();
         boolean listThread = ToolConfig.getInstance().isListThreadPrefix();
-        AmazonS3 s3 = AmazonS3ClientBuilder.standard()
-            .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(userName, "secretKey")))
-            .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(restHost, ""))
-            .enablePathStyleAccess()
+        URI uri;
+        try {
+            uri = new URI(restHost);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+        // Singleton: Use s3AsyncClient for all requests.
+        S3AsyncClient s3AsyncClient = S3AsyncClient.builder()
+            .httpClientBuilder(AwsCrtAsyncHttpClient
+                .builder()
+                .connectionTimeout(Duration.ofSeconds(3))
+                .maxConcurrency(100))
+            .credentialsProvider(() -> AwsBasicCredentials.create(ak, sk))
+            .endpointOverride(uri)
+            .region(Region.of(region))
+            .forcePathStyle(true)
             .build();
+
         for (int i=0;i<totalThreads;i++) {
             String prefix;
             if (listThread) {
@@ -117,10 +135,12 @@ public class ReadFileTask extends AbstractTask {
             } else {
                 prefix = workPath;
             }
-            ListObjectsV2Result result = s3.listObjectsV2(bucket, prefix);
+            ListObjectsV2Request req =
+                ListObjectsV2Request.builder().bucket(bucket).prefix(prefix).build();
+            ListObjectsV2Response result = s3AsyncClient.listObjectsV2(req).join();
             List<String> names = new ArrayList<>();
-            for (S3ObjectSummary summary : result.getObjectSummaries()) {
-                names.add(summary.getKey());
+            for (S3Object s3Object : result.contents()) {
+                names.add(s3Object.key());
             }
             nameLists.put(i, names);
         }
@@ -389,13 +409,21 @@ public class ReadFileTask extends AbstractTask {
                 ClientConfiguration clientConfiguration =
                     new ClientConfiguration().withSocketTimeout(300 * 1000)
                         .withTcpKeepAlive(keepAlive);
-                AmazonS3 s3 = AmazonS3ClientBuilder.standard()
-                    .withCredentials(new AWSStaticCredentialsProvider(
-                        new BasicAWSCredentials(user, "secretKey")))
-                    .withEndpointConfiguration(
-                        new AwsClientBuilder.EndpointConfiguration(restHost, ""))
-                    .withClientConfiguration(clientConfiguration)
-                    .enablePathStyleAccess()
+
+                String ak = ToolConfig.getInstance().getAccessKey();
+                String sk = ToolConfig.getInstance().getSecretKey();
+                String region = ToolConfig.getInstance().getRegion();
+                URI uri = new URI(restHost);
+                // Singleton: Use s3AsyncClient for all requests.
+                S3AsyncClient s3AsyncClient = S3AsyncClient.builder()
+                    .httpClientBuilder(AwsCrtAsyncHttpClient
+                        .builder()
+                        .connectionTimeout(Duration.ofSeconds(300))
+                        .maxConcurrency(100))
+                    .credentialsProvider(() -> AwsBasicCredentials.create(ak, sk))
+                    .endpointOverride(uri)
+                    .region(Region.of(region))
+                    .forcePathStyle(true)
                     .build();
                 int bufferSize = ToolConfig.getInstance().getReadBufferSize();
                 while (true) {
@@ -406,7 +434,7 @@ public class ReadFileTask extends AbstractTask {
                         if (end.get()) {
                             return;
                         }
-                        rangeReadS3(bucket, s3, rangeSize, bufferSize, path, keepAlive);
+                        rangeReadS3(bucket, s3AsyncClient, rangeSize, bufferSize, path, keepAlive);
                     }
                 }
             } catch (Exception e) {
@@ -416,14 +444,13 @@ public class ReadFileTask extends AbstractTask {
             }
         }
 
-        private void rangeReadS3(String bucket, AmazonS3 s3, long rangeSize, int bufferSize,
+        private void rangeReadS3(String bucket, S3AsyncClient s3, long rangeSize, int bufferSize,
                                  String path, boolean keepAlive)
             throws IOException {
-            GetObjectMetadataRequest request = new GetObjectMetadataRequest(bucket, path);
-            ObjectMetadata meta = s3.getObjectMetadata(request);
-            long length = meta.getContentLength();
+            HeadObjectRequest request = HeadObjectRequest.builder().bucket(bucket).key(path).build();
+            HeadObjectResponse meta = s3.headObject(request).join();
+            long length = meta.contentLength();
             long totalSize = 0;
-//            int i = 0;
             int partNumber = (int) (length / rangeSize);
             Random rand = new Random();
             int randomNum = rand.nextInt(partNumber);
@@ -432,16 +459,12 @@ public class ReadFileTask extends AbstractTask {
                     return;
                 }
                 try (Timer.Context context = timer.time()) {
-                    GetObjectRequest getObjectRequest = new GetObjectRequest(bucket, path);
-                    if (!keepAlive) {
-                        getObjectRequest.putCustomRequestHeader("Connection", "close");
-                    }
-//                    getObjectRequest.setRange((long) i * rangeSize,
-//                        (long) (i + 1) * rangeSize - 1);
-                    getObjectRequest.setRange((long) randomNum * rangeSize,
-                        (long) (randomNum + 1) * rangeSize - 1);
-                    S3Object object = s3.getObject(getObjectRequest);
-                    S3ObjectInputStream objectContent = object.getObjectContent();
+                    GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                        .bucket(bucket)
+                        .key(path)
+                        .range("bytes=" + randomNum * rangeSize + "-" + ((randomNum + 1) * rangeSize - 1)).build();
+                    InputStream objectContent = s3.getObject(getObjectRequest,
+                        AsyncResponseTransformer.toBlockingInputStream()).join();
 
                     byte[] buffer = new byte[bufferSize];
                     int readSize;
@@ -449,8 +472,7 @@ public class ReadFileTask extends AbstractTask {
                         totalSize += readSize;
                         iopsMeter.mark(readSize);
                     }
-                    object.close();
-//                    i++;
+                    objectContent.close();
                 } catch (Exception e) {
                     log.error("read file {} exception:{}", path, e.getMessage());
                 } finally {
