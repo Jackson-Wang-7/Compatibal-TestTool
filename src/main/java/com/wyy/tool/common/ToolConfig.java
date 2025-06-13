@@ -30,6 +30,7 @@ public class ToolConfig {
     private int loopCount;
     private String accessKey;
     private String secretKey;
+    private String region;
     private long rangeSize;
     private boolean listThreadPrefix;
     private boolean tcpKeepAlive;
@@ -82,6 +83,7 @@ public class ToolConfig {
             props.getProperty(Constants.KEY_LOOP_COUNT, Constants.VALUE_LOOP_COUNT_DEFAULT));
         accessKey = props.getProperty(Constants.KEY_ACCESS_KEY, Constants.VALUE_ACCESS_KEY_DEFAULT);
         secretKey = props.getProperty(Constants.KEY_SECRET_KEY, Constants.VALUE_SECRET_KEY_DEFAULT);
+        region = props.getProperty(Constants.KEY_S3_REGION, Constants.VALUE_S3_REGION_DEFAULT);
         rangeSize = Integer.parseInt(
             props.getProperty(Constants.KEY_RANGE_SIZE, Constants.VALUE_RANGE_SIZE_DEFAULT));
         listThreadPrefix =
@@ -181,6 +183,10 @@ public class ToolConfig {
 
     public String getSecretKey() {
         return secretKey;
+    }
+
+    public String getRegion() {
+        return region;
     }
 
     public long getRangeSize() {
