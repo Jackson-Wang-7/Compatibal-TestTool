@@ -93,7 +93,7 @@ public class Constants {
 
     public static final String KEY_SECRET_KEY = "secret_key";
 
-    public static final String VALUE_SECRET_KEY_DEFAULT = "";
+    public static final String VALUE_SECRET_KEY_DEFAULT = "secret_key";
 
     public static final String KEY_S3_REGION = "s3_region";
 
